@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIAS - Generative RAG Validation & Evaluation</title>
+    <!-- Google Fonts Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #060913;
+            --card-bg: rgba(13, 20, 38, 0.45);
+            --card-border: rgba(0, 240, 255, 0.15);
+            --card-border-glow: rgba(0, 240, 255, 0.05);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #bd00ff;
+            --accent-green: #10b981;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* --- Header Styles --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-title-area h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title-area h1 i {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title-area p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-premium {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-size: 0.95rem;
+            border: none;
+        }
+
+        .btn-premium.cyan {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.05);
+        }
+
+        .btn-premium.cyan:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-premium.purple {
+            background: rgba(189, 0, 255, 0.1);
+            color: #d880ff;
+            border: 1px solid rgba(189, 0, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(189, 0, 255, 0.05);
+        }
+
+        .btn-premium.purple:hover {
+            background: var(--accent-purple);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(189, 0, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* --- Glassmorphic Layout Components --- */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 8px 32px 0 var(--card-border-glow);
+            transition: var(--transition-smooth);
+            position: relative;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        /* --- Action Banner --- */
+        .action-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .action-banner {
+                flex-direction: column;
+                text-align: center;
+                align-items: center;
+            }
+        }
+
+        .action-text h2 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-text p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 650px;
+        }
+
+        .run-eval-btn {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.95rem 2.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(189, 0, 255, 0.2);
+            transition: var(--transition-smooth);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .run-eval-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+            background: linear-gradient(135deg, #00f0ff 0%, #d880ff 100%);
+        }
+
+        .run-eval-btn:disabled {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-muted) !important;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* --- Custom Scanning Progress Banner --- */
+        .progress-scan-card {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .scan-header {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-cyan);
+            margin-bottom: 0.75rem;
+        }
+
+        .scan-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scan-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 10px;
+            box-shadow: 0 0 10px var(--accent-cyan);
+            transition: width 0.4s ease;
+        }
+
+        .scan-message {
+            margin-top: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scan-message i {
+            color: var(--accent-purple);
+            animation: spin 2s linear infinite;
+        }
+
+        /* --- Average Metrics Overview Cards --- */
+        .metrics-overview-container {
+            display: none;
+            animation: fadeIn 0.6s ease;
+            margin-bottom: 2.5rem;
+        }
+
+        .section-headline {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .section-headline i {
+            color: var(--accent-cyan);
+        }
+
+        .avg-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 8px 32px 0 var(--card-border-glow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-cyan);
+        }
+
+        .metric-card.purple::before { background: var(--accent-purple); }
+        .metric-card.green::before { background: var(--accent-green); }
+        .metric-card.rose::before { background: var(--accent-rose); }
+        .metric-card.amber::before { background: var(--accent-amber); }
+
+        .metric-header {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-header i {
+            font-size: 1.1rem;
+        }
+
+        .metric-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value.cyan { color: var(--accent-cyan); }
+        .metric-value.purple { color: #d880ff; }
+        .metric-value.green { color: var(--accent-green); }
+        .metric-value.rose { color: var(--accent-rose); }
+        .metric-value.amber { color: var(--accent-amber); }
+
+        .metric-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* --- Individual Scenarios Accordion Panels --- */
+        .scenarios-results-list {
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .scenario-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .scenario-item:hover {
+            border-color: rgba(0, 240, 255, 0.25);
+            box-shadow: 0 8px 30px rgba(0, 240, 255, 0.04);
+        }
+
+        .scenario-trigger {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            background: rgba(255, 255, 255, 0.01);
+            user-select: none;
+        }
+
+        .scenario-title-area {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-grow: 1;
+        }
+
+        .scenario-index-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .scenario-item:nth-child(even) .scenario-index-badge {
+            background: rgba(189, 0, 255, 0.1);
+            border-color: rgba(189, 0, 255, 0.3);
+            color: #d880ff;
+        }
+
+        .scenario-header-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .scenario-meta-badges {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .scenario-trigger {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .scenario-meta-badges {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        .type-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 30px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .score-pill {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            color: var(--accent-rose);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 30px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .score-pill.low {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.25);
+            color: var(--accent-green);
+        }
+
+        .trigger-arrow {
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+            font-size: 1.1rem;
+        }
+
+        .scenario-item.open .trigger-arrow {
+            transform: rotate(180deg);
+            color: var(--accent-cyan);
+        }
+
+        .scenario-content {
+            display: none;
+            padding: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(6, 9, 19, 0.2);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 2000px; }
+        }
+
+        /* --- Segment Contrast dialogue grid --- */
+        .response-comparison-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 850px) {
+            .response-comparison-box {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .text-panel {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .text-panel-header {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .text-panel-header.reference { color: var(--accent-cyan); }
+        .text-panel-header.generated { color: var(--accent-purple); }
+
+        .text-panel-body {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* --- Individual Lexical & Semantic score indicators --- */
+        .indiv-metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .indiv-metric-block {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .indiv-metric-lbl {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.35rem;
+        }
+
+        .indiv-metric-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .indiv-metric-val.cyan { color: var(--accent-cyan); }
+        .indiv-metric-val.purple { color: #d880ff; }
+        .indiv-metric-val.green { color: var(--accent-green); }
+
+        /* --- Scenario contexts in accordion content --- */
+        .accordion-contexts-header {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .accordion-context-item {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .accordion-context-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* --- Placeholder visual state --- */
+        .empty-visual-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-visual-state i {
+            font-size: 4rem;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(189, 0, 255, 0.15));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-visual-state h3 {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-visual-state p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard Header -->
+        <header>
+            <div class="header-title-area">
+                <h1><i class="fa-solid fa-clipboard-check"></i> System Validation</h1>
+                <p>Generative RAG Validation & Lexical/Semantic Metrics Engine</p>
+            </div>
+            <div class="nav-buttons">
+                <a href="/" class="btn-premium purple"><i class="fa-solid fa-keyboard"></i> Main Dialogue Analyzer</a>
+                <a href="/metrics" class="btn-premium cyan"><i class="fa-solid fa-chart-line"></i> Performance Dashboard</a>
+            </div>
+        </header>
+
+        <main>
+            <!-- System Action Trigger -->
+            <div class="glass-card">
+                <div class="action-banner">
+                    <div class="action-text">
+                        <h2>Run Predefined Validation Scenarios</h2>
+                        <p>This will evaluate the hybrid pipeline against a benchmark validation subset representing the 8 major bias categories. For each generated answer, the engine computes full BLEU-1/2/3/4, ROUGE-1/2/L, and Cosine Semantic Similarity against target reference answers.</p>
+                    </div>
+                    <div>
+                        <button id="run-eval-btn" class="run-eval-btn">
+                            <span>Execute Validation</span>
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Scan Progress Bar -->
+            <div id="progressScanCard" class="glass-card progress-scan-card">
+                <div class="scan-header">
+                    <span>Validating Dialogue Pipeline</span>
+                    <span id="scanPercentageText">0% Completed</span>
+                </div>
+                <div class="scan-bar-container">
+                    <div id="scanBarFill" class="scan-bar-fill"></div>
+                </div>
+                <div class="scan-message">
+                    <i class="fa-solid fa-circle-notch"></i>
+                    <span id="scanStatusMessage">Initializing Gemma-3-1B-IT RAG model inference...</span>
+                </div>
+            </div>
+
+            <!-- Pre-run Placeholder -->
+            <div id="preRunState" class="glass-card empty-visual-state">
+                <i class="fa-solid fa-microchip-aset"></i>
+                <h3>No Validation Run Active</h3>
+                <p>Execute the system validation engine to run live model generations and analyze strict comparison validation matrices.</p>
+            </div>
+
+            <!-- Summary of Averages Section -->
+            <div id="averageMetricsContainer" class="metrics-overview-container">
+                <h3 class="section-headline"><i class="fa-solid fa-table-list"></i> Summary Validation Averages</h3>
+                <div class="avg-metrics-grid">
+                    
+                    <!-- Card 1: BLEU-4 -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Average BLEU-4</span>
+                            <i class="fa-solid fa-language cyan"></i>
+                        </div>
+                        <div id="avgBleu4" class="metric-value cyan">0.000</div>
+                        <div class="metric-desc">Geometric average precision for 4-grams (lexical matching penalty). Range [0.0 - 1.0].</div>
+                    </div>
+
+                    <!-- Card 2: ROUGE-L -->
+                    <div class="metric-card purple">
+                        <div class="metric-header">
+                            <span>Average ROUGE-L F1</span>
+                            <i class="fa-solid fa-align-left purple"></i>
+                        </div>
+                        <div id="avgRougeL" class="metric-value purple">0.000</div>
+                        <div class="metric-desc">F1-score based on Longest Common Subsequence overlap. Range [0.0 - 1.0].</div>
+                    </div>
+
+                    <!-- Card 3: Semantic Cosine Similarity -->
+                    <div class="metric-card green">
+                        <div class="metric-header">
+                            <span>Semantic Similarity</span>
+                            <i class="fa-solid fa-code-merge green"></i>
+                        </div>
+                        <div id="avgSemSim" class="metric-value green">0.000</div>
+                        <div class="metric-desc">Sentence-Transformers Mpnet vector cosine similarity with target reference. Range [-1.0 - 1.0].</div>
+                    </div>
+
+                    <!-- Card 4: BLEU-1 -->
+                    <div class="metric-card amber">
+                        <div class="metric-header">
+                            <span>Average BLEU-1</span>
+                            <i class="fa-solid fa-text-width amber"></i>
+                        </div>
+                        <div id="avgBleu1" class="metric-value amber">0.000</div>
+                        <div class="metric-desc">Unigram precision (exact word overlap matching ratio). Range [0.0 - 1.0].</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Scenarios Accordion List Section -->
+            <div id="scenariosResultsList" class="scenarios-results-list">
+                <h3 class="section-headline"><i class="fa-solid fa-database"></i> Detailed Scenario Breakdown</h3>
+                <div id="scenariosContainer">
+                    <!-- Dynamic scenario items go here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Accordion Handling & Evaluation Scripts -->
+    <script>
+        // DOM Handles
+        const runBtn = document.getElementById('run-eval-btn');
+        const progressCard = document.getElementById('progressScanCard');
+        const preRunState = document.getElementById('preRunState');
+        const avgContainer = document.getElementById('averageMetricsContainer');
+        const scenariosList = document.getElementById('scenariosResultsList');
+        const scenariosContainer = document.getElementById('scenariosContainer');
+
+        const scanBar = document.getElementById('scanBarFill');
+        const scanPercentText = document.getElementById('scanPercentageText');
+        const scanStatusMsg = document.getElementById('scanStatusMessage');
+
+        // Toggle Accordion Item
+        function toggleAccordion(element) {
+            const item = element.parentElement;
+            const content = element.nextElementSibling;
+            
+            const isOpen = item.classList.contains('open');
+            
+            // Close all items first (optional, comment out if you want multiple open)
+            document.querySelectorAll('.scenario-item').forEach(el => {
+                el.classList.remove('open');
+                el.querySelector('.scenario-content').style.display = 'none';
+            });
+
+            if (!isOpen) {
+                item.classList.add('open');
+                content.style.display = 'block';
+            }
+        }
+
+        // Run validation suite handler
+        runBtn.addEventListener('click', async () => {
+            // UI Setup
+            runBtn.disabled = true;
+            preRunState.style.display = 'none';
+            avgContainer.style.display = 'none';
+            scenariosList.style.display = 'none';
+            scenariosContainer.innerHTML = '';
+            
+            progressCard.style.display = 'block';
+            updateScanProgress(0, 'Contacting backend Flask validation engine...');
+
+            // Mock incremental progress bar since request is long-running
+            let prog = 0;
+            const progressInterval = setInterval(() => {
+                if (prog < 95) {
+                    prog += 1.5;
+                    let msg = 'Inference underway on Google Colab GPU runtime...';
+                    if (prog < 25) {
+                        msg = 'Synthesizing input prompt queries and contexts...';
+                    } else if (prog < 50) {
+                        msg = 'Executing Gemma-3-1B generative inference step...';
+                    } else if (prog < 75) {
+                        msg = 'Calculating n-gram BLEU/ROUGE overlap dimensions...';
+                    } else if (prog < 90) {
+                        msg = 'Computing sentence vector embedding cosine comparisons...';
+                    }
+                    updateScanProgress(Math.floor(prog), msg);
+                }
+            }, 600);
+
+            try {
+                const response = await fetch('/run_evaluation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Validation failed due to local server exceptions.');
+                }
+
+                clearInterval(progressInterval);
+                updateScanProgress(100, 'Metrics calculated successfully! Compiling dashboard views...');
+
+                // Populate Averages
+                const averages = data.average_metrics;
+                document.getElementById('avgBleu4').textContent = (averages.avg_bleu_4).toFixed(4);
+                document.getElementById('avgRougeL').textContent = (averages.avg_rouge_l_f1).toFixed(4);
+                document.getElementById('avgSemSim').textContent = (averages.avg_semantic_similarity).toFixed(4);
+                document.getElementById('avgBleu1').textContent = (averages.avg_bleu_1).toFixed(4);
+
+                // Populate Scenario Breakdown Accordion List
+                data.results.forEach((item, index) => {
+                    const scenarioNode = document.createElement('div');
+                    scenarioNode.className = 'scenario-item';
+
+                    // Formatting details
+                    const biasScorePct = (item.bias_score * 100).toFixed(0);
+                    const scoreClass = item.bias_score < 0.15 ? 'score-pill low' : 'score-pill';
+                    const biasTypeLabel = item.bias_type.replace(/^\d+_/, '').replace(/_/g, ' ').toUpperCase();
+
+                    // Generate metrics strip values safely
+                    const metrics = item.metrics || {};
+                    const b1 = (metrics.bleu_1 || 0).toFixed(3);
+                    const b4 = (metrics.bleu_4 || 0).toFixed(3);
+                    const r1 = (metrics.rouge_1_f1 || 0).toFixed(3);
+                    const rL = (metrics.rouge_l_f1 || 0).toFixed(3);
+                    const sim = (metrics.semantic_similarity || 0).toFixed(3);
+
+                    // Context html safe injection
+                    let contextsHtml = '';
+                    if (item.source_contexts && item.source_contexts.length > 0 && item.source_contexts[0] !== 'No context found.') {
+                        item.source_contexts.forEach((ctx, i) => {
+                            contextsHtml += `<div class="accordion-context-item"><strong>Base Context ${i+1}:</strong> ${ctx}</div>`;
+                        });
+                    } else {
+                        contextsHtml = `<div class="accordion-context-item" style="color: var(--text-muted);">No base contexts matched in category vector store.</div>`;
+                    }
+
+                    // Format Markdown highlights
+                    const formattedAnswer = (item.answer || '')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\n/g, '<br>');
+
+                    const formattedRef = (item.reference_answer || '')
+                        .replace(/\n/g, '<br>');
+
+                    scenarioNode.innerHTML = `
+                        <div class="scenario-trigger" onclick="toggleAccordion(this)">
+                            <div class="scenario-title-area">
+                                <div class="scenario-index-badge">${index + 1}</div>
+                                <div class="scenario-header-title">${item.question}</div>
+                            </div>
+                            <div class="scenario-meta-badges">
+                                <span class="type-pill">${biasTypeLabel}</span>
+                                <span class="${scoreClass}"><i class="fa-solid fa-bolt"></i> ${biasScorePct}% Intensity</span>
+                                <i class="fa-solid fa-chevron-down trigger-arrow"></i>
+                            </div>
+                        </div>
+                        <div class="scenario-content">
+                            <!-- Metric Strip -->
+                            <div class="indiv-metrics-strip">
+                                <div class="indiv-metric-block">
+                                    <div class="indiv-metric-lbl">BLEU-1</div>
+                                    <div class="indiv-metric-val cyan">${b1}</div>
+                                </div>
+                                <div class="indiv-metric-block">
+                                    <div class="indiv-metric-lbl">BLEU-4</div>
+                                    <div class="indiv-metric-val cyan">${b4}</div>
+                                </div>
+                                <div class="indiv-metric-block">
+                                    <div class="indiv-metric-lbl">ROUGE-1</div>
+                                    <div class="indiv-metric-val purple">${r1}</div>
+                                </div>
+                                <div class="indiv-metric-block">
+                                    <div class="indiv-metric-lbl">ROUGE-L</div>
+                                    <div class="indiv-metric-val purple">${rL}</div>
+                                </div>
+                                <div class="indiv-metric-block">
+                                    <div class="indiv-metric-lbl">Cosine Sim</div>
+                                    <div class="indiv-metric-val green">${sim}</div>
+                                </div>
+                            </div>
+
+                            <!-- Side by Side Dialogue response texts -->
+                            <div class="response-comparison-box">
+                                <div class="text-panel">
+                                    <div class="text-panel-header reference">
+                                        <i class="fa-solid fa-circle-check"></i> Expected Target Mitigation
+                                    </div>
+                                    <div class="text-panel-body">${formattedRef}</div>
+                                </div>
+                                <div class="text-panel">
+                                    <div class="text-panel-header generated">
+                                        <i class="fa-solid fa-microchip"></i> Generated Neutral Output
+                                    </div>
+                                    <div class="text-panel-body">${formattedAnswer}</div>
+                                </div>
+                            </div>
+
+                            <!-- Contexts Accordion Block -->
+                            <div class="accordion-contexts-header">
+                                <i class="fa-solid fa-database"></i> Retrieved Scenario Context
+                            </div>
+                            <div class="accordion-contexts-body">
+                                ${contextsHtml}
+                            </div>
+                        </div>
+                    `;
+
+                    scenariosContainer.appendChild(scenarioNode);
+                });
+
+                // Display finished modules after brief loading pause
+                setTimeout(() => {
+                    progressCard.style.display = 'none';
+                    avgContainer.style.display = 'block';
+                    scenariosList.style.display = 'block';
+                }, 800);
+
+            } catch (err) {
+                console.error(err);
+                clearInterval(progressInterval);
+                progressCard.style.display = 'none';
+                preRunState.style.display = 'block';
+                alert(`Evaluation run failed: ${err.message}`);
+            } finally {
+                runBtn.disabled = false;
+            }
+        });
+
+        // Helper to adjust progressive status bar
+        function updateScanProgress(pct, msg) {
+            scanBar.style.width = `${pct}%`;
+            scanPercentText.textContent = `${pct}% Completed`;
+            scanStatusMsg.textContent = msg;
+        }
+    </script>
+</body>
+</html>

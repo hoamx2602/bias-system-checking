@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIAS - AI-Powered Bias Detection System</title>
+    <!-- Google Fonts Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #060913;
+            --card-bg: rgba(13, 20, 38, 0.45);
+            --card-border: rgba(0, 240, 255, 0.15);
+            --card-border-glow: rgba(0, 240, 255, 0.05);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #bd00ff;
+            --accent-green: #10b981;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Header Styles --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-title-area h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title-area h1 i {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title-area p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-premium {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-size: 0.95rem;
+            border: none;
+        }
+
+        .btn-premium.cyan {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.05);
+        }
+
+        .btn-premium.cyan:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-premium.purple {
+            background: rgba(189, 0, 255, 0.1);
+            color: #d880ff;
+            border: 1px solid rgba(189, 0, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(189, 0, 255, 0.05);
+        }
+
+        .btn-premium.purple:hover {
+            background: var(--accent-purple);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(189, 0, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* --- Glassmorphic Layout Components --- */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 8px 32px 0 var(--card-border-glow);
+            transition: var(--transition-smooth);
+            position: relative;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        /* --- Input Section --- */
+        .input-section h2 {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-section h2 i {
+            color: var(--accent-cyan);
+        }
+
+        .input-section p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .textarea-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            background: rgba(6, 9, 19, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            padding: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            transition: var(--transition-smooth);
+            outline: none;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .analyze-btn-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .analyze-btn {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.85rem 2.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(189, 0, 255, 0.2);
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+            background: linear-gradient(135deg, #00f0ff 0%, #d880ff 100%);
+        }
+
+        .analyze-btn:disabled {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-muted) !important;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* --- Loading Spinner --- */
+        .spinner-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 0;
+        }
+
+        .cyber-spinner {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+        }
+
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: var(--accent-cyan);
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        .spinner-ring-inner {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-bottom-color: var(--accent-purple);
+            animation: spin-reverse 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        .spinner-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent-cyan);
+            font-size: 1.3rem;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spin-reverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .spinner-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* --- Error Message --- */
+        .error-card {
+            display: none;
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            color: #ff8093;
+            align-items: center;
+            gap: 1rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .error-card i {
+            font-size: 1.5rem;
+        }
+
+        /* --- Results Panel --- */
+        .results-section {
+            display: none;
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Classification Overview Grid --- */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 850px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .verdict-info-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .primary-badge-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .glowing-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.08);
+        }
+
+        .verdict-title {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .verdict-text {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        /* --- Score Dial Gauge Container --- */
+        .dial-gauge-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem;
+        }
+
+        .circular-dial-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .dial-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .dial-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.04);
+            stroke-width: 10;
+        }
+
+        .dial-fill {
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 439.82; /* 2 * PI * r = 2 * 3.14159 * 70 = 439.82 */
+            stroke-dashoffset: 439.82;
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 0 8px var(--accent-cyan));
+        }
+
+        .dial-text-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dial-percentage-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dial-lbl {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 0.25rem;
+        }
+
+        /* --- Analysis Contrast Section --- */
+        .section-header-styled {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.75rem;
+        }
+
+        .section-header-styled i {
+            color: var(--accent-purple);
+        }
+
+        .analysis-content {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        .analysis-content p {
+            margin-bottom: 1rem;
+        }
+
+        .analysis-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* --- Side-by-Side Dialogue Contrast Cards --- */
+        .contrast-layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .contrast-layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dialogue-card {
+            background: rgba(13, 20, 38, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .dialogue-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .dialogue-card.original::before {
+            background: var(--accent-rose);
+        }
+
+        .dialogue-card.mitigated::before {
+            background: var(--accent-green);
+        }
+
+        .dialogue-card.original {
+            border-color: rgba(244, 63, 94, 0.15);
+            box-shadow: 0 4px 20px rgba(244, 63, 94, 0.02);
+        }
+
+        .dialogue-card.mitigated {
+            border-color: rgba(16, 185, 129, 0.15);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.02);
+        }
+
+        .dialogue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dialogue-header.original-text {
+            color: var(--accent-rose);
+        }
+
+        .dialogue-header.mitigated-text {
+            color: var(--accent-green);
+        }
+
+        .dialogue-body {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            flex-grow: 1;
+        }
+
+        /* --- Double-Contrast References Section --- */
+        .ref-box-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .ref-box-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .ref-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        .ref-box-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ref-box.zero-bias {
+            border-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .ref-box.zero-bias .ref-box-title {
+            color: var(--accent-green);
+        }
+
+        .ref-box.extreme-bias {
+            border-color: rgba(244, 63, 94, 0.1);
+        }
+
+        .ref-box.extreme-bias .ref-box-title {
+            color: var(--accent-rose);
+        }
+
+        .ref-box-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* --- Source Contexts --- */
+        .source-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .source-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: var(--transition-smooth);
+        }
+
+        .source-card:hover {
+            border-color: rgba(0, 240, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .source-card-header {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .source-card-body {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* --- Knowledge Graph Section --- */
+        .graph-wrapper {
+            margin-top: 3.5rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 2.5rem;
+        }
+
+        .graph-wrapper h2 {
+            font-size: 1.6rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .graph-wrapper h2 i {
+            color: var(--accent-cyan);
+        }
+
+        .graph-wrapper p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .graph-image-container {
+            background: rgba(13, 20, 38, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .graph-image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Utility Classes --- */
+        .pulse-light {
+            animation: pulse-light 2s infinite;
+        }
+
+        @keyframes pulse-light {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard Header -->
+        <header>
+            <div class="header-title-area">
+                <h1><i class="fa-solid fa-brain-circuit"></i> BIAS Detector</h1>
+                <p>Hybrid Supervised Classifier & RAG Dialogue Ethical Alignment System</p>
+            </div>
+            <div class="nav-buttons">
+                <a href="/evaluation" class="btn-premium purple"><i class="fa-solid fa-square-poll-vertical"></i> System Evaluation</a>
+                <a href="/metrics" class="btn-premium cyan"><i class="fa-solid fa-chart-line"></i> Performance Dashboard</a>
+            </div>
+        </header>
+
+        <main>
+            <!-- Core Input Panel -->
+            <div class="glass-card input-section">
+                <h2><i class="fa-solid fa-feather-pointed"></i> Analyze Bias Dialogue</h2>
+                <p>Input a professional scenario, interview dialogue, or recruitment question to evaluate potential bias markers and receive neutrality recommendations.</p>
+                <div class="textarea-container">
+                    <textarea id="userInput" placeholder="e.g., Ask something like: How does age affect hiring decisions? or paste raw interview exchanges..."></textarea>
+                </div>
+                <div class="analyze-btn-container">
+                    <button id="analyzeBtn" class="analyze-btn">
+                        <span>Analyze Dialogue</span>
+                        <i class="fa-solid fa-rocket"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loader -->
+            <div id="spinner" class="spinner-container">
+                <div class="cyber-spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring-inner"></div>
+                    <i class="fa-solid fa-eye spinner-logo"></i>
+                </div>
+                <div class="spinner-text">Deconstructing Dialogue...</div>
+            </div>
+
+            <!-- Error Notification -->
+            <div id="errorMessage" class="error-card">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="errorText">An error occurred while analyzing the dialogue. Please check model load settings.</span>
+            </div>
+
+            <!-- Analysis Output Section -->
+            <div id="results" class="results-section">
+                
+                <!-- Classification Grid -->
+                <div class="results-grid">
+                    <!-- Left: Verdict Text -->
+                    <div class="glass-card verdict-info-card">
+                        <div class="primary-badge-container">
+                            <span class="glowing-badge">
+                                <i class="fa-solid fa-circle-nodes pulse-light"></i>
+                                <span id="biasType">N/A</span>
+                            </span>
+                        </div>
+                        <h3 class="verdict-title">Analysis Verdict</h3>
+                        <div id="answerVerdict" class="verdict-text">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Circular Dial -->
+                    <div class="glass-card dial-gauge-card">
+                        <div class="circular-dial-container">
+                            <svg class="dial-svg" viewBox="0 0 160 160">
+                                <circle class="dial-track" cx="80" cy="80" r="70"></circle>
+                                <circle class="dial-fill" cx="80" cy="80" r="70"></circle>
+                            </svg>
+                            <div class="dial-text-wrapper">
+                                <span id="dialPercentage" class="dial-percentage-val">0%</span>
+                                <span class="dial-lbl">Severity</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explanation & RAG Contrast -->
+                <div class="glass-card">
+                    <h3 class="section-header-styled"><i class="fa-solid fa-magnifying-glass-chart"></i> Explanatory Analysis & Contrast</h3>
+                    <div id="answerAnalysis" class="analysis-content">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Dialogue Contrast Cards -->
+                <div class="contrast-layout-grid">
+                    <!-- Left: Original Dialogue -->
+                    <div class="dialogue-card original">
+                        <div class="dialogue-header original-text">
+                            <span><i class="fa-solid fa-triangle-exclamation"></i> Original Dialogue</span>
+                        </div>
+                        <div id="originalDialogueBody" class="dialogue-body">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Mitigated Neutral Reframing -->
+                    <div class="dialogue-card mitigated">
+                        <div class="dialogue-header mitigated-text">
+                            <span><i class="fa-solid fa-shield-halved"></i> Mitigated Neutral Dialogue</span>
+                        </div>
+                        <div id="mitigatedDialogueBody" class="dialogue-body">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Double-Contrast Dialogue References -->
+                <div class="ref-box-container">
+                    <div class="ref-box zero-bias">
+                        <div class="ref-box-title">
+                            <i class="fa-solid fa-circle-check"></i> Zero Bias Reference (0%)
+                        </div>
+                        <div id="zeroRefText" class="ref-box-text">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="ref-box extreme-bias">
+                        <div class="ref-box-title">
+                            <i class="fa-solid fa-circle-xmark"></i> Extreme Bias Reference (100%)
+                        </div>
+                        <div id="extremeRefText" class="ref-box-text">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Source Contexts -->
+                <div class="section-header-styled" style="border: none; margin-bottom: 0.5rem;">
+                    <i class="fa-solid fa-database"></i> Source Contexts Retained from Knowledge Base
+                </div>
+                <div id="sourceContexts" class="source-grid">
+                    <!-- Populated dynamically -->
+                </div>
+
+            </div>
+
+            <!-- Knowledge Graph Sample Image -->
+            {% if knowledge_graph_image %}
+            <div class="graph-wrapper">
+                <h2><i class="fa-solid fa-diagram-project"></i> Knowledge Base Visualization</h2>
+                <p>Below is a dynamic sample subgraph of our ethical scenario knowledge graph, showcasing similarity links between distinct bias groups.</p>
+                <div class="graph-image-container">
+                    <img src="{{ url_for('serve_static', filename=knowledge_graph_image.split('/')[-1]) }}" alt="Bias Scenario Knowledge Graph Subgraph">
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <!-- AJAX Handling and Custom UI Animations -->
+    <script>
+        // Set up references
+        const userInputTextarea = document.getElementById('userInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const spinner = document.getElementById('spinner');
+        const resultsSection = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        // Circular Dial Update Function
+        function updateDialGauge(percentageVal) {
+            const circle = document.querySelector('.dial-fill');
+            const percentLabel = document.getElementById('dialPercentage');
+            
+            const radius = 70;
+            const circumference = 2 * Math.PI * radius; // 439.82
+            
+            // Map percentage to stroke-dashoffset
+            const offset = circumference - (percentageVal * circumference);
+            circle.style.strokeDashoffset = offset;
+
+            // Determine dial color depending on severity level
+            let color = 'var(--accent-cyan)';
+            if (percentageVal >= 0.70) {
+                color = 'var(--accent-rose)';
+            } else if (percentageVal >= 0.40) {
+                color = 'var(--accent-amber)';
+            } else if (percentageVal >= 0.15) {
+                color = 'var(--accent-cyan)';
+            } else {
+                color = 'var(--accent-green)';
+            }
+            circle.style.stroke = color;
+            circle.style.filter = `drop-shadow(0 0 8px ${color})`;
+
+            // Count Up Number animation
+            let start = 0;
+            const end = Math.round(percentageVal * 100);
+            
+            if (end === 0) {
+                percentLabel.textContent = '0%';
+                percentLabel.style.color = '#fff';
+                return;
+            }
+
+            const duration = 1200; // ms
+            const stepTime = Math.max(Math.floor(duration / end), 15);
+            
+            const timer = setInterval(() => {
+                start++;
+                percentLabel.textContent = `${start}%`;
+                if (start >= end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // Markdown Segment Splitting and Parsing for Gemma 3
+        function parseGenerativeResponse(text) {
+            const parsed = {
+                verdict: '',
+                analysis: '',
+                mitigation: ''
+            };
+
+            // Split by section headers
+            const sections = text.split(/###\s+/);
+
+            sections.forEach(section => {
+                const lines = section.trim().split('\n');
+                if (lines.length === 0 || !lines[0]) return;
+
+                const header = lines[0].toLowerCase();
+                const content = lines.slice(1).join('\n').trim();
+
+                if (header.includes('verdict') || header.includes('severity') || header.includes('🚨')) {
+                    parsed.verdict = content;
+                } else if (header.includes('analysis') || header.includes('contrast') || header.includes('🔍')) {
+                    parsed.analysis = content;
+                } else if (header.includes('mitigation') || header.includes('reframed') || header.includes('neutral') || header.includes('🩹')) {
+                    parsed.mitigation = content;
+                }
+            });
+
+            // Clean leading/trailing quotes if the model wrapped sections in double quotes
+            for (let key in parsed) {
+                parsed[key] = parsed[key].replace(/^["']|["']$/g, '').trim();
+            }
+
+            // Fallback: If no segments matched, split by double line breaks
+            if (!parsed.verdict && !parsed.analysis && !parsed.mitigation) {
+                parsed.verdict = text;
+            }
+
+            return parsed;
+        }
+
+        // Helper to format text markdown tags (like bold, lists, etc.) into basic safe HTML
+        function formatMarkdownToHTML(mdText) {
+            if (!mdText) return 'N/A';
+            let formatted = mdText
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
+                .replace(/\n/g, '<br>');
+            
+            // Wrap bullet items in ul
+            if (formatted.includes('<li>')) {
+                // simple hack to wrap consecutive list items
+                formatted = formatted.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+            }
+            return formatted;
+        }
+
+        // Trigger Evaluation Handler
+        analyzeBtn.addEventListener('click', async () => {
+            const rawInput = userInputTextarea.value.trim();
+
+            if (!rawInput) {
+                errorMessage.style.display = 'flex';
+                errorText.textContent = 'Please provide dialogue or a scenario statement to analyze.';
+                return;
+            }
+
+            // UI State Reset
+            analyzeBtn.disabled = true;
+            spinner.style.display = 'flex';
+            resultsSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: rawInput })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server processing error occurred.');
+                }
+
+                // 1. Set Bias Badge Type
+                const displayType = data.bias_type_display || 'Neutral / N/A';
+                document.getElementById('biasType').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${displayType}`;
+
+                // 2. Parse Gemma 3 Output Sections
+                const parsedOutput = parseGenerativeResponse(data.answer);
+
+                // 3. Render Verdict
+                const verdictHtml = formatMarkdownToHTML(parsedOutput.verdict || 'No significant bias detected.');
+                document.getElementById('answerVerdict').innerHTML = verdictHtml;
+
+                // 4. Render Explanatory Analysis
+                const analysisHtml = formatMarkdownToHTML(parsedOutput.analysis || 'The text matches ethical standards.');
+                document.getElementById('answerAnalysis').innerHTML = analysisHtml;
+
+                // 5. Populate Comparison Dialogues
+                document.getElementById('originalDialogueBody').textContent = rawInput;
+                
+                // Clean the mitigation text from dialogue wrappers
+                let neutralMitigation = parsedOutput.mitigation || 'Dialogue is neutral and requires no mitigation.';
+                neutralMitigation = neutralMitigation.replace(/^"|"$/g, '').trim();
+                document.getElementById('mitigatedDialogueBody').textContent = neutralMitigation;
+
+                // 6. Set Double-Contrast References
+                document.getElementById('zeroRefText').textContent = data.no_bias_example || 'N/A';
+                document.getElementById('extremeRefText').textContent = data.extreme_bias_example || 'N/A';
+
+                // 7. Render Source Context Cards
+                const sourceContainer = document.getElementById('sourceContexts');
+                sourceContainer.innerHTML = ''; // clear prior sources
+
+                if (data.source_contexts && data.source_contexts.length > 0 && data.source_contexts[0] !== 'No context found.') {
+                    data.source_contexts.forEach((contextText, i) => {
+                        const card = document.createElement('div');
+                        card.className = 'source-card';
+                        card.innerHTML = `
+                            <div class="source-card-header">
+                                <i class="fa-solid fa-cube"></i> Scenario Reference ${i + 1}
+                            </div>
+                            <div class="source-card-body">${contextText}</div>
+                        `;
+                        sourceContainer.appendChild(card);
+                    });
+                } else {
+                    const fallbackCard = document.createElement('div');
+                    fallbackCard.className = 'source-card';
+                    fallbackCard.style.gridColumn = '1 / -1';
+                    fallbackCard.innerHTML = `
+                        <div class="source-card-header" style="color: var(--text-muted);">
+                            <i class="fa-solid fa-box-open"></i> No Base Scenario Contexts Matches
+                        </div>
+                        <div class="source-card-body" style="color: var(--text-muted); font-style: italic;">No specific dialogue matching bias categories was retrieved from the database.</div>
+                    `;
+                    sourceContainer.appendChild(fallbackCard);
+                }
+
+                // 8. Show Results Container
+                resultsSection.style.display = 'block';
+
+                // 9. Animate Dial Score
+                const finalScore = parseFloat(data.bias_score) || 0.0;
+                // Animate Dial after container is visible so transitions trigger correctly
+                setTimeout(() => {
+                    updateDialGauge(finalScore);
+                }, 50);
+
+            } catch (err) {
+                console.error(err);
+                errorMessage.style.display = 'flex';
+                errorText.textContent = `Analysis failed: ${err.message}`;
+            } finally {
+                analyzeBtn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

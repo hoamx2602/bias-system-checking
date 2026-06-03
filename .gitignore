@@ -1,0 +1,27 @@
+# Mac OS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+venv/
+env/
+.venv/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Project Specific Large Files / Caches
+@.hf_cache/
+models/
+logs/
+results/
+evaluation_results/
+*.pkl
+
+# Dataset (Optional: depend on if user wants datasets in git, but typically excluded if large)
+# dataset/ 
+
