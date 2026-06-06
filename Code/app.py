@@ -1,17 +1,8 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory
 import os
+import config  # must be first: loads .env and configures HF environment variables
 
-# Configure Hugging Face cache before importing heavy modules
-hf_cache = os.path.join(os.getcwd(), "@.hf_cache")
-os.environ.setdefault("HF_HOME", hf_cache)
-os.environ.setdefault("HUGGINGFACE_HUB_CACHE", hf_cache)
-os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS", "1")
-os.environ.setdefault("HF_HUB_DISABLE_HARDLINKS", "1")
-os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-
-
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from models import get_analysis_pipeline
-import config
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
@@ -32,7 +23,7 @@ try:
     print("=" * 60)
 except Exception as e:
     print(f"FATAL: Could not initialize the AI pipeline. Error: {e}")
-    print("Please check your model cache directory (@.hf_cache/) and config.ini")
+    print("Please check your model cache directory (@.hf_cache/) and .env file")
     analysis_pipeline = None
 
 # --- Static File Serving ---
@@ -350,6 +341,65 @@ def index():
 def evaluation():
     """Renders the evaluation page."""
     return render_template('evaluation.html', questions=config.EVALUATION_QUESTIONS)
+
+@app.route('/api/graph')
+def get_graph_data():
+    """Returns knowledge graph nodes and edges as JSON for D3.js visualization."""
+    if not analysis_pipeline or not analysis_pipeline.vector_store:
+        return jsonify({"error": "Graph not available"}), 500
+
+    from collections import defaultdict
+    graph = analysis_pipeline.vector_store.graph
+
+    # Sample representative scenarios: up to 7 per bias type
+    scenarios_by_type = defaultdict(list)
+    for n, d in graph.nodes(data=True):
+        if d.get('type') == 'scenario' and not n.startswith('eval_target'):
+            scenarios_by_type[d.get('bias_type', '')].append(n)
+
+    selected_scenarios = set()
+    for bt, nodes_list in scenarios_by_type.items():
+        selected_scenarios.update(nodes_list[:7])
+
+    # For each scenario, grab its 0% and 100% dialogue neighbours
+    selected_dialogues = set()
+    for s in selected_scenarios:
+        got_zero = got_hundred = False
+        for neighbor in graph.neighbors(s):
+            nd = graph.nodes[neighbor]
+            if nd.get('type') != 'dialogue':
+                continue
+            bl = nd.get('bias_level', -1)
+            if bl == 0 and not got_zero:
+                selected_dialogues.add(neighbor); got_zero = True
+            elif bl == 100 and not got_hundred:
+                selected_dialogues.add(neighbor); got_hundred = True
+
+    selected = selected_scenarios | selected_dialogues
+
+    nodes_out = []
+    for n in selected:
+        d = graph.nodes[n]
+        text = d.get('text', '')
+        nodes_out.append({
+            'id': n,
+            'type': d.get('type', ''),
+            'bias_type': d.get('bias_type', ''),
+            'bias_level': d.get('bias_level'),
+            'label': (text[:80] + '…') if len(text) > 80 else text
+        })
+
+    edges_out = []
+    for u, v, ed in graph.edges(data=True):
+        if u in selected and v in selected:
+            edges_out.append({
+                'source': u,
+                'target': v,
+                'relationship': ed.get('relationship', ''),
+                'weight': float(ed.get('weight', 0))
+            })
+
+    return jsonify({'nodes': nodes_out, 'edges': edges_out})
 
 @app.route('/metrics')
 def metrics():

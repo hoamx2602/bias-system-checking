@@ -3,48 +3,49 @@ echo ===================================================
 echo Bias Detection System - Windows Setup ^& Train
 echo ===================================================
 echo.
-
-echo [1/5] Checking Python...
-python --version >nul 2>&1
-IF %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Python is not installed or not in PATH. Please install Python (check "Add to PATH" during installation^).
-    pause
-    exit /b
-)
-
+echo IMPORTANT: Make sure your conda environment is activated before running this script.
 echo.
-echo [2/5] Creating Virtual Environment (venv)...
-if not exist "venv" (
-    python -m venv venv
-    echo Virtual environment created.
-) else (
-    echo Virtual environment already exists.
-)
 
-echo.
-echo [3/5] Activating venv and Installing Dependencies...
-call venv\Scripts\activate
+echo [1/4] Installing Python dependencies...
 cd Code
 pip install -r requirements.txt
-:: Install any extra packages used in colab
-pip install pyngrok accelerate openpyxl pandas
+
+echo.
+echo ---------------------------------------------------
+echo Checking PyTorch CUDA support...
+python -c "import torch; cuda=torch.cuda.is_available(); print('CUDA available:', cuda); print('GPU:', torch.cuda.get_device_name(0) if cuda else 'None')"
+echo.
+echo If CUDA is NOT available but you have a GPU, install the correct PyTorch build:
+echo.
+echo   RTX 50xx (Blackwell / sm_120) — requires nightly cu128:
+echo     pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+echo.
+echo   RTX 40xx / 30xx (Ampere/Ada) — stable cu124:
+echo     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+echo.
+echo   RTX 20xx / older — stable cu118:
+echo     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+echo.
+echo (Check your GPU generation with: nvidia-smi)
+echo ---------------------------------------------------
 
 echo.
 echo ===================================================
 echo ACTION REQUIRED: Hugging Face Token
 echo ===================================================
-echo Make sure you have opened "Code\config.ini" and replaced
-echo "YOUR_HUGGINGFACE_TOKEN" with your actual Hugging Face token.
-echo If you haven't done this yet, press Ctrl+C to stop, edit the file, and run this script again.
+echo Make sure you have opened "Code\.env" and set:
+echo   HF_TOKEN=your_actual_token
+echo If you haven't done this yet, press Ctrl+C to stop, edit the file,
+echo and run this script again.
 echo.
 pause
 
 echo.
-echo [4/5] Downloading Models...
+echo [2/4] Downloading Models...
 python download_model.py
 
 echo.
-echo [5/5] Training Models (This might take a while)...
+echo [3/4] Training Models (This might take a while)...
 python train.py
 
 echo.

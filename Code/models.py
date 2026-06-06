@@ -5,7 +5,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSequen
 from threading import Thread
 from vector_store import get_vector_store
 import config
-import configparser
 
 # --- Bias Type and Display Mappings ---
 BIAS_TYPE_MAPPING = {
@@ -80,13 +79,7 @@ CRITICAL RULES FOR THIS SECTION:
 """
 
 def get_hf_token():
-    """Reads the Hugging Face token from config.ini"""
-    parser = configparser.ConfigParser()
-    parser.read('config.ini')
-    token = parser.get('huggingface', 'token', fallback=None)
-    if not token or "YOUR_HUGGING_FACE_TOKEN_HERE" in token:
-        return None
-    return token
+    return os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
 
 class BiasAnalysisPipeline:
     """
@@ -105,7 +98,7 @@ class BiasAnalysisPipeline:
         # Get auth token and set it as an environment variable
         auth_token = get_hf_token()
         if not auth_token:
-            raise ValueError("Hugging Face token not found in config.ini. Please add it to continue.")
+            raise ValueError("Hugging Face token not found. Please set HF_TOKEN in your .env file.")
         os.environ["HUGGING_FACE_HUB_TOKEN"] = auth_token
 
         hf_cache = os.environ.get("HF_HOME") or os.environ.get("HUGGINGFACE_HUB_CACHE")
@@ -186,11 +179,15 @@ class BiasAnalysisPipeline:
         ).to(self.device)
         
         with torch.no_grad():
+            import torch.nn.functional as F
             outputs_type = self.type_model(**inputs_type)
-            pred_idx = torch.argmax(outputs_type.logits, dim=1).item()
+            logits = outputs_type.logits
+            pred_idx = torch.argmax(logits, dim=1).item()
             predicted_type_str = REVERSE_BIAS_TYPE_MAPPING.get(pred_idx, "11_misc")
-            
-        return predicted_intensity, predicted_type_str
+            raw_probs = F.softmax(logits, dim=1).squeeze()
+            type_probs = raw_probs.tolist() if raw_probs.dim() > 0 else [raw_probs.item()]
+
+        return predicted_intensity, predicted_type_str, type_probs
 
     def analyze(self, user_question):
         """
@@ -204,8 +201,19 @@ class BiasAnalysisPipeline:
         
         # --- Step 1: Supervised Prediction ---
         print("Step 1: Running supervised bias classifiers...")
-        predicted_intensity, predicted_type_str = self.predict_bias(user_question)
+        predicted_intensity, predicted_type_str, type_probs = self.predict_bias(user_question)
         bias_type_display = DISPLAY_BIAS_TYPES.get(predicted_type_str, "Miscellaneous Bias")
+        max_prob = max(type_probs) if type_probs else 1.0
+        type_breakdown = []
+        for type_key, type_idx in sorted(BIAS_TYPE_MAPPING.items(), key=lambda x: x[1]):
+            prob = type_probs[type_idx] if type_idx < len(type_probs) else 0.0
+            score = round((prob / max_prob) * predicted_intensity * 100) if max_prob > 0 else 0
+            type_breakdown.append({
+                "type": type_key,
+                "display": DISPLAY_BIAS_TYPES.get(type_key, type_key),
+                "score": score
+            })
+        type_breakdown.sort(key=lambda x: x["score"], reverse=True)
         print(f"-> Predicted Bias Intensity: {predicted_intensity*100:.1f}%, Type: {predicted_type_str} ({bias_type_display})")
         
         # --- Step 2: Retrieve Context with Category Filtering ---
@@ -225,6 +233,7 @@ class BiasAnalysisPipeline:
                 "bias_type": predicted_type_str,
                 "bias_type_display": bias_type_display,
                 "bias_score": predicted_intensity,
+                "type_breakdown": type_breakdown,
                 "no_bias_example": "N/A",
                 "extreme_bias_example": "N/A"
             }
@@ -338,6 +347,7 @@ class BiasAnalysisPipeline:
             "bias_type": predicted_type_str,
             "bias_type_display": bias_type_display,
             "bias_score": float(predicted_intensity),
+            "type_breakdown": type_breakdown,
             "no_bias_example": no_bias_example,
             "extreme_bias_example": extreme_bias_example
         }
