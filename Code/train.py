@@ -303,12 +303,13 @@ def main():
     os.makedirs(config.EVALUATION_RESULTS_DIR, exist_ok=True)
 
     # Setup hardware info — re-check at runtime in case torch was reinstalled since config loaded
-    cuda_available = torch.cuda.is_available()
-    device_name = "cuda" if cuda_available else "cpu"
-    if cuda_available:
+    device_name = config.DEVICE
+    if device_name == "cuda":
         print(f"Using Device: cuda ({torch.cuda.get_device_name(0)})")
+    elif device_name == "mps":
+        print("Using Device: mps (Apple Silicon Metal Performance Shaders)")
     else:
-        print("Using Device: cpu  (WARNING: no CUDA GPU detected — training will be slow)")
+        print("Using Device: cpu  (WARNING: no GPU detected — training will be slow)")
         print("If you have a GPU, install CUDA-enabled PyTorch: pip install torch --index-url https://download.pytorch.org/whl/cu124")
 
     # =========================================================================
@@ -323,8 +324,8 @@ def main():
         num_labels=1,  # Regression
         **model_kwargs
     )
-    if cuda_available:
-        model_int.to("cuda")
+    if device_name != "cpu":
+        model_int.to(device_name)
 
     training_args_int = TrainingArguments(
         output_dir=os.path.join(config.RESULTS_DIR, "intensity"),
@@ -342,7 +343,7 @@ def main():
         metric_for_best_model="mse",
         greater_is_better=False,
         save_total_limit=1,
-        fp16=cuda_available,
+        fp16=(device_name == "cuda"),
         dataloader_pin_memory=False,
         remove_unused_columns=False,
         dataloader_num_workers=0,
@@ -382,8 +383,8 @@ def main():
         num_labels=11,  # 11 Classes
         **model_kwargs
     )
-    if cuda_available:
-        model_type.to("cuda")
+    if device_name != "cpu":
+        model_type.to(device_name)
 
     training_args_type = TrainingArguments(
         output_dir=os.path.join(config.RESULTS_DIR, "type"),
@@ -401,7 +402,7 @@ def main():
         metric_for_best_model="accuracy",
         greater_is_better=True,
         save_total_limit=1,
-        fp16=cuda_available,
+        fp16=(device_name == "cuda"),
         dataloader_pin_memory=False,
         remove_unused_columns=False,
         dataloader_num_workers=0,

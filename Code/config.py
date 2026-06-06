@@ -4,6 +4,15 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Load variables from .env into os.environ
 
+# --- Device Detection ---
+if torch.cuda.is_available():
+    DEVICE = "cuda"
+elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+    DEVICE = "mps"
+else:
+    DEVICE = "cpu"
+
+USE_CUDA = (DEVICE == "cuda")
 # --- HF Environment Setup (must happen before any huggingface_hub / transformers import) ---
 _hf_cache = os.path.join(os.getcwd(), os.environ.get("HF_CACHE_DIR", "@.hf_cache"))
 os.makedirs(_hf_cache, exist_ok=True)
@@ -40,16 +49,14 @@ USE_PRETRAINED_CLASSIFIER = True
 TRAIN_SAMPLE_RATIO = 1.0  # Use 100% of data for training
 TEST_SPLIT_SIZE = 0.2
 TRAIN_EPOCHS = 100
-TRAIN_BATCH_SIZE = 4 if not torch.cuda.is_available() else 8  # Smaller batch for CPU
-EVAL_BATCH_SIZE = 4 if not torch.cuda.is_available() else 8   # Smaller batch for CPU
+TRAIN_BATCH_SIZE = 4 if DEVICE == "cpu" else 8  # Smaller batch for CPU
+EVAL_BATCH_SIZE = 4 if DEVICE == "cpu" else 8   # Smaller batch for CPU
 WARMUP_STEPS = 500
 WEIGHT_DECAY = 0.01
 LOGGING_STEPS = 50
 LEARNING_RATE = 5e-5
 
 # --- Application Settings ---
-# Set to True if a GPU is available, False otherwise
-USE_CUDA = torch.cuda.is_available()
 PROMPT_TEMPLATE = """
 You are an AI Bias and Ethics Analyst. Your task is to provide a clear, neutral, and informative answer to the user's question based *only* on the context provided.
 

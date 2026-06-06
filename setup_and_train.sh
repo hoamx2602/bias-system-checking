@@ -14,8 +14,8 @@ pip install -r requirements.txt
 
 echo
 echo "---------------------------------------------------"
-echo "Checking PyTorch CUDA support..."
-python -c "import torch; cuda=torch.cuda.is_available(); print('CUDA available:', cuda); print('GPU:', torch.cuda.get_device_name(0) if cuda else 'None')"
+echo "Checking PyTorch GPU (CUDA/MPS) support..."
+python -c "import torch; cuda=torch.cuda.is_available(); mps=hasattr(torch.backends, 'mps') and torch.backends.mps.is_available(); print('CUDA available:', cuda); print('MPS available:', mps); print('GPU:', torch.cuda.get_device_name(0) if cuda else 'Apple Silicon GPU' if mps else 'None')"
 echo
 echo "If CUDA is NOT available but you have a GPU, install the correct PyTorch build:"
 echo

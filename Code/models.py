@@ -92,7 +92,7 @@ class BiasAnalysisPipeline:
         self.vector_store = vector_store
         
         # Determine the device to use
-        self.device = "cuda" if config.USE_CUDA else "cpu"
+        self.device = getattr(config, "DEVICE", "cpu")
         print(f"Using device: {self.device}")
 
         # Get auth token and set it as an environment variable
@@ -107,7 +107,7 @@ class BiasAnalysisPipeline:
             local_kwargs["cache_dir"] = hf_cache
         
         load_kwargs = {}
-        if self.device == "cuda":
+        if self.device in ["cuda", "mps"]:
             load_kwargs.update({"dtype": torch.float16, "device_map": "auto"})
         else:
             load_kwargs.update({"dtype": torch.float32, "device_map": {"": "cpu"}})
