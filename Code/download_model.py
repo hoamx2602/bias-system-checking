@@ -1,23 +1,13 @@
+import os
+import config  # loads .env and configures HF environment variables
+
 from huggingface_hub import snapshot_download, HfApi
 from huggingface_hub.utils import HfHubHTTPError
-import config
-import os
-import configparser
+
 
 def get_hf_token():
-    """Reads the Hugging Face token from config.ini"""
-    # Support inline comments like: token = hf_xxx  # my token
-    parser = configparser.ConfigParser(inline_comment_prefixes=("#", ";"))
-    parser.read('config.ini')
-    token = parser.get('huggingface', 'token', fallback=None)
-    if token:
-        token = token.strip().strip('"').strip("'")
-    # Fallback to environment variables if not present in config.ini
-    if not token or "YOUR_HUGGING_FACE_TOKEN_HERE" in token:
-        token = os.environ.get("HUGGING_FACE_HUB_TOKEN") or os.environ.get("HF_TOKEN")
-        if token:
-            token = token.strip().strip('"').strip("'")
-    return token if token else None
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    return token.strip().strip('"').strip("'") if token else None
 
 
 def validate_token_and_access(token: str, repo_id: str) -> None:
@@ -34,7 +24,7 @@ def validate_token_and_access(token: str, repo_id: str) -> None:
         raise RuntimeError(
             "Your Hugging Face token appears invalid (401). "
             "Please create a new READ token at https://huggingface.co/settings/tokens "
-            "and update it in config.ini or set HUGGING_FACE_HUB_TOKEN."
+            "and set HF_TOKEN in your .env file."
         ) from e
     except Exception as e:
         raise RuntimeError("Failed to validate Hugging Face token. Check your network and try again.") from e
@@ -78,8 +68,7 @@ def main():
     token = get_hf_token()
     if not token:
         print("\n--- ERROR: Hugging Face token not found. ---")
-        print("Add your READ token to 'config.ini' under [huggingface] token = ...")
-        print("Or set the environment variable HUGGING_FACE_HUB_TOKEN or HF_TOKEN.")
+        print("Please set HF_TOKEN in your .env file.")
         return
 
     try:
@@ -88,19 +77,7 @@ def main():
         validate_token_and_access(token=token, repo_id=gen_model)
         validate_token_and_access(token=token, repo_id=classifier_model)
 
-
-        # Set the token as an environment variable for compatibility
-        os.environ["HUGGING_FACE_HUB_TOKEN"] = token
-
-        # Use a workspace-local cache on the current drive to avoid Windows symlink privilege issues
-        cache_root = os.path.join(os.getcwd(), "@.hf_cache")
-        os.makedirs(cache_root, exist_ok=True)
-        os.environ["HF_HOME"] = cache_root
-        os.environ["HUGGINGFACE_HUB_CACHE"] = cache_root
-        # Avoid symlink/hardlink operations on Windows; copy files instead
-        os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
-        os.environ["HF_HUB_DISABLE_HARDLINKS"] = "1"
-        os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+        cache_root = os.environ["HF_HOME"]
 
         # Limit downloads to essential files only
         retrieval_allow = [
@@ -155,10 +132,19 @@ def main():
         print("python app.py")
         
     except Exception as e:
+        err = str(e)
         print(f"\n--- An error occurred during download: {e} ---")
-
-        print("\nPlease check your internet connection and try running this script again.")
-        print("If the problem persists, you may have a firewall, VPN, or proxy blocking the connection to huggingface.co.")
+        if "403" in err or "gated" in err or "not in the authorized list" in err:
+            print("\nACCESS DENIED (403): This is a gated model requiring explicit license acceptance.")
+            print("Steps to fix:")
+            print("  1. Visit the model page on huggingface.co and click 'Acknowledge license'")
+            print("  2. Make sure your HF_TOKEN in .env belongs to the same account")
+            print("  3. Re-run this script")
+        elif "401" in err:
+            print("\nAUTHENTICATION FAILED (401): Your HF_TOKEN may be invalid or expired.")
+            print("Generate a new READ token at https://huggingface.co/settings/tokens and update .env")
+        else:
+            print("\nPlease check your internet connection and try running this script again.")
 
 if __name__ == "__main__":
     main() 

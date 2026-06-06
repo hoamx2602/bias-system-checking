@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BIAS - AI-Powered Bias Detection System</title>
-    <!-- Google Fonts Outfit & Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         :root {
             --bg-color: #060913;
-            --card-bg: rgba(13, 20, 38, 0.45);
-            --card-border: rgba(0, 240, 255, 0.15);
-            --card-border-glow: rgba(0, 240, 255, 0.05);
+            --card-bg: rgba(13, 20, 38, 0.55);
+            --card-border: rgba(0, 240, 255, 0.12);
+            --card-border-glow: rgba(0, 240, 255, 0.04);
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
             --text-muted: #6b7280;
@@ -26,11 +25,7 @@
             --border-radius: 16px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -39,31 +34,24 @@
             min-height: 100vh;
             padding: 2.5rem 1.5rem;
             line-height: 1.6;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.07) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.07) 0%, transparent 40%);
             background-attachment: fixed;
         }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-        }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing: -0.02em; }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1100px; margin: 0 auto; }
 
-        /* --- Header Styles --- */
+        /* ---- Header ---- */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2.5rem;
             padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .header-title-area h1 {
@@ -84,15 +72,9 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .header-title-area p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
+        .header-title-area p { color: var(--text-secondary); font-size: 0.95rem; }
 
-        .nav-buttons {
-            display: flex;
-            gap: 1rem;
-        }
+        .nav-buttons { display: flex; gap: 1rem; }
 
         .btn-premium {
             font-family: 'Outfit', sans-serif;
@@ -109,35 +91,12 @@
             border: none;
         }
 
-        .btn-premium.cyan {
-            background: rgba(0, 240, 255, 0.1);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.05);
-        }
+        .btn-premium.cyan { background: rgba(0,240,255,0.1); color: var(--accent-cyan); border: 1px solid rgba(0,240,255,0.3); }
+        .btn-premium.cyan:hover { background: var(--accent-cyan); color: #000; box-shadow: 0 0 20px rgba(0,240,255,0.4); transform: translateY(-2px); }
+        .btn-premium.purple { background: rgba(189,0,255,0.1); color: #d880ff; border: 1px solid rgba(189,0,255,0.3); }
+        .btn-premium.purple:hover { background: var(--accent-purple); color: #fff; box-shadow: 0 0 20px rgba(189,0,255,0.4); transform: translateY(-2px); }
 
-        .btn-premium.cyan:hover {
-            background: var(--accent-cyan);
-            color: #000;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-premium.purple {
-            background: rgba(189, 0, 255, 0.1);
-            color: #d880ff;
-            border: 1px solid rgba(189, 0, 255, 0.3);
-            box-shadow: 0 4px 20px rgba(189, 0, 255, 0.05);
-        }
-
-        .btn-premium.purple:hover {
-            background: var(--accent-purple);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(189, 0, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        /* --- Glassmorphic Layout Components --- */
+        /* ---- Glass Card ---- */
         .glass-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -147,50 +106,28 @@
             box-shadow: 0 8px 32px 0 var(--card-border-glow);
             transition: var(--transition-smooth);
             position: relative;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             overflow: hidden;
         }
 
         .glass-card::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            top: 0; left: 0;
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
         }
 
-        /* --- Input Section --- */
-        .input-section h2 {
-            font-size: 1.4rem;
-            color: #fff;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .input-section h2 i {
-            color: var(--accent-cyan);
-        }
-
-        .input-section p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .textarea-container {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
+        /* ---- Input Section ---- */
+        .input-section h2 { font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .input-section h2 i { color: var(--accent-cyan); }
+        .input-section > p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.25rem; }
 
         textarea {
             width: 100%;
             min-height: 120px;
-            background: rgba(6, 9, 19, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(6,9,19,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
             color: #fff;
             padding: 1rem;
@@ -200,17 +137,12 @@
             transition: var(--transition-smooth);
             outline: none;
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+            margin-bottom: 1.5rem;
         }
 
-        textarea:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 2px 8px rgba(0,0,0,0.5);
-        }
+        textarea:focus { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0,240,255,0.15), inset 0 2px 8px rgba(0,0,0,0.5); }
 
-        .analyze-btn-container {
-            display: flex;
-            justify-content: flex-end;
-        }
+        .analyze-btn-container { display: flex; justify-content: flex-end; }
 
         .analyze-btn {
             font-family: 'Outfit', sans-serif;
@@ -222,887 +154,1257 @@
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(189, 0, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(189,0,255,0.2);
             transition: var(--transition-smooth);
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
 
-        .analyze-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
-            background: linear-gradient(135deg, #00f0ff 0%, #d880ff 100%);
-        }
+        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(0,240,255,0.4); }
 
         .analyze-btn:disabled {
-            background: rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255,255,255,0.1) !important;
             color: var(--text-muted) !important;
             cursor: not-allowed;
             transform: none !important;
             box-shadow: none !important;
         }
 
-        /* --- Loading Spinner --- */
-        .spinner-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem 0;
-        }
+        /* ---- Spinner ---- */
+        .spinner-container { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 0; }
+        .cyber-spinner { position: relative; width: 80px; height: 80px; margin-bottom: 1.5rem; }
+        .spinner-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid transparent; border-top-color: var(--accent-cyan); animation: spin 1.2s cubic-bezier(0.5,0,0.5,1) infinite; }
+        .spinner-ring-inner { position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border-radius: 50%; border: 4px solid transparent; border-bottom-color: var(--accent-purple); animation: spin-reverse 1.2s cubic-bezier(0.5,0,0.5,1) infinite; }
+        .spinner-logo { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: var(--accent-cyan); font-size: 1.3rem; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .spinner-text { font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: var(--accent-cyan); letter-spacing: 0.1em; text-transform: uppercase; animation: pulse 1.5s ease-in-out infinite; }
 
-        .cyber-spinner {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin-bottom: 1.5rem;
-        }
+        /* ---- Error ---- */
+        .error-card { display: none; background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; color: #ff8093; align-items: center; gap: 1rem; }
 
-        .spinner-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 4px solid transparent;
-            border-top-color: var(--accent-cyan);
-            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        }
+        /* ---- Results ---- */
+        .results-section { display: none; animation: fadeIn 0.6s cubic-bezier(0.4,0,0.2,1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        .spinner-ring-inner {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            border-radius: 50%;
-            border: 4px solid transparent;
-            border-bottom-color: var(--accent-purple);
-            animation: spin-reverse 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        }
-
-        .spinner-logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--accent-cyan);
-            font-size: 1.3rem;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes spin-reverse {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(-360deg); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .spinner-text {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.1rem;
-            color: var(--accent-cyan);
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        /* --- Error Message --- */
-        .error-card {
-            display: none;
-            background: rgba(244, 63, 94, 0.1);
-            border: 1px solid rgba(244, 63, 94, 0.3);
-            border-radius: 12px;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 2rem;
-            color: #ff8093;
-            align-items: center;
-            gap: 1rem;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .error-card i {
-            font-size: 1.5rem;
-        }
-
-        /* --- Results Panel --- */
-        .results-section {
-            display: none;
-            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- Classification Overview Grid --- */
-        .results-grid {
+        /* ---- Overall Bias Score ---- */
+        .bias-score-layout {
             display: grid;
-            grid-template-columns: 1.8fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        @media (max-width: 850px) {
-            .results-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .verdict-info-card {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .primary-badge-container {
-            margin-bottom: 1.5rem;
-        }
-
-        .glowing-badge {
-            display: inline-flex;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 3rem;
             align-items: center;
-            gap: 0.6rem;
-            background: rgba(0, 240, 255, 0.08);
-            border: 1px solid rgba(0, 240, 255, 0.25);
-            color: var(--accent-cyan);
-            padding: 0.5rem 1.25rem;
-            border-radius: 50px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
-            font-size: 0.95rem;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.08);
         }
+        @media (max-width: 768px) { .bias-score-layout { grid-template-columns: 1fr; gap: 2rem; } }
 
-        .verdict-title {
-            font-size: 1.8rem;
-            color: #fff;
-            margin-bottom: 1rem;
-        }
+        .score-section-title { font-size: 1rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .info-icon { color: var(--text-muted); font-size: 0.8rem; }
 
-        .verdict-text {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            line-height: 1.7;
-        }
+        .gauge-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .gauge-svg { width: 100%; max-width: 300px; }
 
-        /* --- Score Dial Gauge Container --- */
-        .dial-gauge-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2.5rem;
-        }
+        .gauge-score-display { display: flex; align-items: baseline; gap: 0.4rem; margin-top: 0.5rem; }
+        .gauge-number { font-family: 'Outfit', sans-serif; font-size: 3.8rem; font-weight: 800; line-height: 1; color: #f97316; transition: color 0.5s ease; }
+        .gauge-divider { font-size: 1rem; color: var(--text-secondary); }
+        .gauge-level-label { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; color: #f97316; margin-top: 0.4rem; text-align: center; transition: color 0.5s ease; }
+        .gauge-level-desc { color: var(--text-secondary); font-size: 0.82rem; text-align: center; max-width: 240px; margin-top: 0.4rem; line-height: 1.5; }
 
-        .circular-dial-container {
-            position: relative;
-            width: 180px;
-            height: 180px;
-        }
+        .legend-desc { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem; }
+        .legend-table { display: flex; flex-direction: column; gap: 1rem; }
+        .legend-row { display: grid; grid-template-columns: 12px 64px 110px 1fr; align-items: start; gap: 0.75rem; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+        .legend-range { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.82rem; color: var(--text-secondary); }
+        .legend-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; }
+        .legend-name.low { color: #22c55e; }
+        .legend-name.moderate { color: #eab308; }
+        .legend-name.high { color: #f97316; }
+        .legend-name.severe { color: #ef4444; }
+        .legend-detail { color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; }
 
-        .dial-svg {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
+        /* ---- Bias Breakdown Table ---- */
+        .breakdown-subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .breakdown-header { display: grid; grid-template-columns: 2.2fr 3fr 90px; padding: 0.4rem 0 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 0.25rem; font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .breakdown-row { display: grid; grid-template-columns: 2.2fr 3fr 90px; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); gap: 0.75rem; }
+        .breakdown-row:last-child { border-bottom: none; }
+        .bias-type-cell { display: flex; align-items: center; gap: 0.8rem; }
+        .bias-type-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
+        .type-name { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem; color: #fff; }
+        .type-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; margin-top: 0.1rem; }
+        .bar-cell { display: flex; align-items: center; gap: 0.75rem; }
+        .bar-track { flex-grow: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+        .bar-score { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.95rem; color: #fff; min-width: 26px; text-align: right; }
+        .level-badge { display: inline-block; padding: 0.22rem 0.55rem; border-radius: 6px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.73rem; text-align: center; }
+        .level-badge.low { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .level-badge.moderate { background: rgba(234,179,8,0.15); color: #eab308; }
+        .level-badge.high { background: rgba(249,115,22,0.15); color: #f97316; }
+        .level-badge.severe { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .breakdown-footnote { margin-top: 1rem; color: var(--text-muted); font-size: 0.78rem; display: flex; align-items: center; gap: 0.4rem; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 0.75rem; }
 
-        .dial-track {
-            fill: none;
-            stroke: rgba(255, 255, 255, 0.04);
-            stroke-width: 10;
-        }
+        /* ---- Info Panels ---- */
+        .info-panels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        @media (max-width: 768px) { .info-panels-grid { grid-template-columns: 1fr; } }
+        .info-panel-header { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem; }
+        .info-panel-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .info-panel-header h3 { font-size: 1.05rem; color: #fff; }
+        .info-panel-desc { color: var(--text-secondary); font-size: 0.87rem; line-height: 1.6; margin-bottom: 0.85rem; }
+        .info-panel-highlight { color: #a78bfa; font-weight: 600; font-size: 0.87rem; margin-bottom: 0.6rem; }
+        .info-panel-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+        .info-panel-list li { display: flex; align-items: center; gap: 0.55rem; font-size: 0.87rem; color: var(--text-secondary); }
+        .info-panel-list li i { color: #a78bfa; font-size: 0.75rem; flex-shrink: 0; }
+        .mitigation-steps { display: flex; flex-direction: column; gap: 0.85rem; }
+        .mitigation-step { display: flex; align-items: flex-start; gap: 0.8rem; }
+        .step-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .mitigation-step strong { display: block; font-size: 0.87rem; color: #fff; margin-bottom: 0.15rem; }
+        .mitigation-step p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
 
-        .dial-fill {
-            fill: none;
-            stroke: var(--accent-cyan);
-            stroke-width: 10;
-            stroke-linecap: round;
-            stroke-dasharray: 439.82; /* 2 * PI * r = 2 * 3.14159 * 70 = 439.82 */
-            stroke-dashoffset: 439.82;
-            transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(0 0 8px var(--accent-cyan));
-        }
+        /* ---- Collapsible Accordion ---- */
+        .collapse-group { margin-bottom: 1.5rem; }
 
-        .dial-text-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dial-percentage-val {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1;
-            background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .dial-lbl {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-top: 0.25rem;
-        }
-
-        /* --- Analysis Contrast Section --- */
-        .section-header-styled {
-            font-size: 1.4rem;
-            color: #fff;
-            margin-bottom: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 0.75rem;
-        }
-
-        .section-header-styled i {
-            color: var(--accent-purple);
-        }
-
-        .analysis-content {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            line-height: 1.7;
-        }
-
-        .analysis-content p {
-            margin-bottom: 1rem;
-        }
-
-        .analysis-content p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* --- Side-by-Side Dialogue Contrast Cards --- */
-        .contrast-layout-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .contrast-layout-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .dialogue-card {
-            background: rgba(13, 20, 38, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .collapse-section {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px;
-            padding: 1.5rem;
-            position: relative;
+            margin-bottom: 0.6rem;
+            backdrop-filter: blur(14px);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
         }
 
-        .dialogue-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 4px;
-            height: 100%;
-        }
+        .collapse-section:last-child { margin-bottom: 0; }
 
-        .dialogue-card.original::before {
-            background: var(--accent-rose);
-        }
-
-        .dialogue-card.mitigated::before {
-            background: var(--accent-green);
-        }
-
-        .dialogue-card.original {
-            border-color: rgba(244, 63, 94, 0.15);
-            box-shadow: 0 4px 20px rgba(244, 63, 94, 0.02);
-        }
-
-        .dialogue-card.mitigated {
-            border-color: rgba(16, 185, 129, 0.15);
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.02);
-        }
-
-        .dialogue-header {
+        .collapse-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.25rem;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .collapse-header:hover { background: rgba(255,255,255,0.025); }
+
+        .collapse-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem;
             font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .collapse-arrow {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+            flex-shrink: 0;
+        }
+
+        .collapse-section.open .collapse-arrow { transform: rotate(180deg); }
+
+        /* Max-height animation trick */
+        .collapse-body-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .collapse-section.open .collapse-body-wrapper { max-height: 4000px; }
+
+        .collapse-body {
+            padding: 1.25rem 1.5rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Bias type badge inside collapse header */
+        .glowing-badge-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(0,240,255,0.08);
+            border: 1px solid rgba(0,240,255,0.25);
+            color: var(--accent-cyan);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
-        .dialogue-header.original-text {
-            color: var(--accent-rose);
+        /* ---- LLM Content ---- */
+        .verdict-text { color: var(--text-secondary); font-size: 1rem; line-height: 1.7; }
+        .analysis-content { color: var(--text-secondary); font-size: 1rem; line-height: 1.7; }
+        .analysis-content p { margin-bottom: 0.85rem; }
+        .analysis-content p:last-child { margin-bottom: 0; }
+
+        /* ---- Dialogue Body ---- */
+        .dialogue-body { font-size: 1rem; line-height: 1.6; color: var(--text-primary); }
+
+        /* Conversation chat bubble format */
+        .dialogue-conversation { display: flex; flex-direction: column; gap: 0.85rem; }
+
+        .speech-bubble {
+            max-width: 82%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
         }
 
-        .dialogue-header.mitigated-text {
-            color: var(--accent-green);
+        .speech-interviewer {
+            align-self: flex-start;
+            background: rgba(0,240,255,0.07);
+            border: 1px solid rgba(0,240,255,0.15);
+            border-bottom-left-radius: 4px;
         }
 
-        .dialogue-body {
-            font-size: 1.05rem;
-            line-height: 1.6;
+        .speech-candidate {
+            align-self: flex-end;
+            background: rgba(189,0,255,0.07);
+            border: 1px solid rgba(189,0,255,0.15);
+            border-bottom-right-radius: 4px;
+        }
+
+        .speech-other {
+            align-self: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .speech-speaker {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.3rem;
+        }
+
+        .speech-interviewer .speech-speaker { color: var(--accent-cyan); }
+        .speech-candidate .speech-speaker { color: #d880ff; }
+        .speech-other .speech-speaker { color: var(--text-muted); }
+
+        .speech-text { font-size: 0.93rem; line-height: 1.55; color: var(--text-primary); }
+
+        /* Plain text dialogue fallback */
+        .dialogue-plain { font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; }
+
+        /* Mitigated dialogue text */
+        .mitigated-text-block {
+            font-size: 0.97rem;
+            line-height: 1.7;
             color: var(--text-primary);
-            flex-grow: 1;
+            background: rgba(16,185,129,0.04);
+            border-left: 3px solid var(--accent-green);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
         }
 
-        /* --- Double-Contrast References Section --- */
-        .ref-box-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
+        /* ---- Reference Boxes ---- */
+        .ref-box-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        @media (max-width: 768px) { .ref-box-container { grid-template-columns: 1fr; } }
+        .ref-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1.25rem; font-size: 0.95rem; }
+        .ref-box-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.65rem; display: flex; align-items: center; gap: 0.5rem; }
+        .ref-box.zero-bias { border-color: rgba(16,185,129,0.1); }
+        .ref-box.zero-bias .ref-box-title { color: var(--accent-green); }
+        .ref-box.extreme-bias { border-color: rgba(244,63,94,0.1); }
+        .ref-box.extreme-bias .ref-box-title { color: var(--accent-rose); }
+        .ref-box-text { color: var(--text-secondary); font-style: italic; font-size: 0.9rem; line-height: 1.6; }
 
-        @media (max-width: 768px) {
-            .ref-box-container {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* ---- Source Contexts ---- */
+        .source-section-label { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; }
+        .source-section-label i { color: var(--accent-cyan); }
+        .source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+        .source-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.25rem; transition: var(--transition-smooth); }
+        .source-card:hover { border-color: rgba(0,240,255,0.2); transform: translateY(-2px); }
+        .source-card-header { font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.65rem; display: flex; align-items: center; gap: 0.5rem; }
+        .source-card-body { color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; }
 
-        .ref-box {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 1.25rem;
-            font-size: 0.95rem;
-        }
+        /* ---- Footer Note ---- */
+        .dashboard-footer-note { text-align: center; padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.82rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 0.5rem; }
+        .dashboard-footer-note i { color: var(--accent-amber); }
 
-        .ref-box-title {
+        /* ---- Knowledge Graph (D3 Interactive) ---- */
+        .graph-wrapper { margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2.5rem; }
+
+        .graph-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+        .graph-header-left h2 { font-size: 1.5rem; color: #fff; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
+        .graph-header-left h2 i { color: var(--accent-cyan); }
+        .graph-header-left p { color: var(--text-secondary); font-size: 0.85rem; }
+
+        .graph-controls { display: flex; flex-wrap: wrap; gap: 0.4rem; max-width: 460px; justify-content: flex-end; }
+
+        .graph-filter-btn {
             font-family: 'Outfit', sans-serif;
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.68rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            border: 1px solid;
+            cursor: pointer;
+            transition: opacity 0.2s ease, background 0.2s ease;
+            background: transparent;
+            letter-spacing: 0.02em;
         }
+        .graph-filter-btn.active { opacity: 1; }
+        .graph-filter-btn:not(.active) { opacity: 0.28; }
 
-        .ref-box.zero-bias {
-            border-color: rgba(16, 185, 129, 0.1);
-        }
-
-        .ref-box.zero-bias .ref-box-title {
-            color: var(--accent-green);
-        }
-
-        .ref-box.extreme-bias {
-            border-color: rgba(244, 63, 94, 0.1);
-        }
-
-        .ref-box.extreme-bias .ref-box-title {
-            color: var(--accent-rose);
-        }
-
-        .ref-box-text {
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        /* --- Source Contexts --- */
-        .source-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .source-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-            padding: 1.25rem;
-            transition: var(--transition-smooth);
-        }
-
-        .source-card:hover {
-            border-color: rgba(0, 240, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .source-card-header {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .source-card-body {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        /* --- Knowledge Graph Section --- */
-        .graph-wrapper {
-            margin-top: 3.5rem;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 2.5rem;
-        }
-
-        .graph-wrapper h2 {
-            font-size: 1.6rem;
-            color: #fff;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .graph-wrapper h2 i {
-            color: var(--accent-cyan);
-        }
-
-        .graph-wrapper p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 2rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .graph-image-container {
-            background: rgba(13, 20, 38, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 1.5rem;
-            max-width: 800px;
-            margin: 0 auto;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        .graph-container {
             position: relative;
+            background: rgba(4, 7, 18, 0.7);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            overflow: hidden;
+            height: 580px;
         }
 
-        .graph-image-container img {
-            max-width: 100%;
-            height: auto;
+        .graph-loading {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            color: var(--accent-cyan);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        #knowledgeGraphSvg { width: 100%; height: 100%; cursor: grab; display: block; }
+        #knowledgeGraphSvg:active { cursor: grabbing; }
+
+        .graph-tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(8,12,28,0.96);
+            border: 1px solid rgba(0,240,255,0.2);
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.7rem 1rem;
+            max-width: 300px;
+            pointer-events: none;
+            z-index: 100;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.6);
         }
+        .graph-tooltip .tt-type { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+        .graph-tooltip .tt-bias { font-size: 0.75rem; margin-bottom: 0.25rem; }
+        .graph-tooltip .tt-text { color: var(--text-secondary); line-height: 1.45; font-size: 0.8rem; }
 
-        /* --- Utility Classes --- */
-        .pulse-light {
-            animation: pulse-light 2s infinite;
-        }
+        .graph-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; flex-wrap: wrap; gap: 0.75rem; }
 
-        @keyframes pulse-light {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
+        .graph-stats { color: var(--text-muted); font-size: 0.8rem; display: flex; gap: 1.5rem; }
+        .graph-stats span { display: flex; align-items: center; gap: 0.35rem; }
+        .graph-stats i { color: var(--accent-cyan); font-size: 0.7rem; }
+
+        .graph-legend-row { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+        .graph-legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.77rem; color: var(--text-secondary); }
+        .graph-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .graph-legend-dot.scenario { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); }
+
+        .pulse-light { animation: pulse-light 2s infinite; }
+        @keyframes pulse-light { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Dashboard Header -->
-        <header>
-            <div class="header-title-area">
-                <h1><i class="fa-solid fa-brain-circuit"></i> BIAS Detector</h1>
-                <p>Hybrid Supervised Classifier & RAG Dialogue Ethical Alignment System</p>
-            </div>
-            <div class="nav-buttons">
-                <a href="/evaluation" class="btn-premium purple"><i class="fa-solid fa-square-poll-vertical"></i> System Evaluation</a>
-                <a href="/metrics" class="btn-premium cyan"><i class="fa-solid fa-chart-line"></i> Performance Dashboard</a>
-            </div>
-        </header>
+<div class="container">
 
-        <main>
-            <!-- Core Input Panel -->
-            <div class="glass-card input-section">
-                <h2><i class="fa-solid fa-feather-pointed"></i> Analyze Bias Dialogue</h2>
-                <p>Input a professional scenario, interview dialogue, or recruitment question to evaluate potential bias markers and receive neutrality recommendations.</p>
-                <div class="textarea-container">
-                    <textarea id="userInput" placeholder="e.g., Ask something like: How does age affect hiring decisions? or paste raw interview exchanges..."></textarea>
-                </div>
-                <div class="analyze-btn-container">
-                    <button id="analyzeBtn" class="analyze-btn">
-                        <span>Analyze Dialogue</span>
-                        <i class="fa-solid fa-rocket"></i>
-                    </button>
-                </div>
-            </div>
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div class="header-title-area">
+            <h1><i class="fa-solid fa-brain-circuit"></i> BIAS Detector</h1>
+            <p>Hybrid Supervised Classifier &amp; RAG Dialogue Ethical Alignment System</p>
+        </div>
+        <div class="nav-buttons">
+            <a href="/evaluation" class="btn-premium purple"><i class="fa-solid fa-square-poll-vertical"></i> System Evaluation</a>
+            <a href="/metrics" class="btn-premium cyan"><i class="fa-solid fa-chart-line"></i> Performance Dashboard</a>
+        </div>
+    </header>
 
-            <!-- Loader -->
-            <div id="spinner" class="spinner-container">
-                <div class="cyber-spinner">
-                    <div class="spinner-ring"></div>
-                    <div class="spinner-ring-inner"></div>
-                    <i class="fa-solid fa-eye spinner-logo"></i>
-                </div>
-                <div class="spinner-text">Deconstructing Dialogue...</div>
-            </div>
+    <main>
 
-            <!-- Error Notification -->
-            <div id="errorMessage" class="error-card">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span id="errorText">An error occurred while analyzing the dialogue. Please check model load settings.</span>
+        <!-- ===== INPUT ===== -->
+        <div class="glass-card input-section">
+            <h2><i class="fa-solid fa-feather-pointed"></i> Analyze Bias Dialogue</h2>
+            <p>Input a professional scenario, interview dialogue, or recruitment question to evaluate potential bias markers and receive neutrality recommendations.</p>
+            <textarea id="userInput" placeholder="e.g., 'Interviewer: Do you think age affects productivity? Candidate: ...' or paste any scenario."></textarea>
+            <div class="analyze-btn-container">
+                <button id="analyzeBtn" class="analyze-btn">
+                    <span>Analyze Dialogue</span>
+                    <i class="fa-solid fa-rocket"></i>
+                </button>
             </div>
+        </div>
 
-            <!-- Analysis Output Section -->
-            <div id="results" class="results-section">
-                
-                <!-- Classification Grid -->
-                <div class="results-grid">
-                    <!-- Left: Verdict Text -->
-                    <div class="glass-card verdict-info-card">
-                        <div class="primary-badge-container">
-                            <span class="glowing-badge">
-                                <i class="fa-solid fa-circle-nodes pulse-light"></i>
-                                <span id="biasType">N/A</span>
-                            </span>
-                        </div>
-                        <h3 class="verdict-title">Analysis Verdict</h3>
-                        <div id="answerVerdict" class="verdict-text">
-                            <!-- Populated dynamically -->
+        <!-- ===== SPINNER ===== -->
+        <div id="spinner" class="spinner-container">
+            <div class="cyber-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring-inner"></div>
+                <i class="fa-solid fa-eye spinner-logo"></i>
+            </div>
+            <div class="spinner-text">Deconstructing Dialogue...</div>
+        </div>
+
+        <!-- ===== ERROR ===== -->
+        <div id="errorMessage" class="error-card">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="errorText">An error occurred while analyzing the dialogue.</span>
+        </div>
+
+        <!-- ===== RESULTS DASHBOARD ===== -->
+        <div id="results" class="results-section">
+
+            <!-- 1. Overall Bias Score (Gauge) -->
+            <div class="glass-card">
+                <div class="bias-score-layout">
+                    <div>
+                        <h3 class="score-section-title">Overall Bias Score <span class="info-icon"><i class="fa-solid fa-circle-info"></i></span></h3>
+                        <div class="gauge-wrapper">
+                            <svg id="biasGaugeSvg" class="gauge-svg" viewBox="0 0 200 130">
+                                <path d="M 18 115 A 82 82 0 0 1 182 115" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="14" stroke-linecap="round"/>
+                                <path d="M 18 115 A 82 82 0 0 1 42.02 57.02" fill="none" stroke="#22c55e" stroke-width="14" stroke-linecap="butt" opacity="0.35"/>
+                                <path d="M 42.02 57.02 A 82 82 0 0 1 100 33" fill="none" stroke="#eab308" stroke-width="14" stroke-linecap="butt" opacity="0.35"/>
+                                <path d="M 100 33 A 82 82 0 0 1 157.98 57.02" fill="none" stroke="#f97316" stroke-width="14" stroke-linecap="butt" opacity="0.35"/>
+                                <path d="M 157.98 57.02 A 82 82 0 0 1 182 115" fill="none" stroke="#ef4444" stroke-width="14" stroke-linecap="butt" opacity="0.35"/>
+                                <path id="gaugeActiveFill" d="" fill="none" stroke-width="14" stroke-linecap="round" opacity="0"/>
+                                <line id="gaugeNeedle" x1="100" y1="115" x2="100" y2="40" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0"/>
+                                <circle id="gaugeCenter" cx="100" cy="115" r="5" fill="white" opacity="0"/>
+                                <text x="14" y="128" fill="#6b7280" font-size="9" text-anchor="middle" font-family="sans-serif">0</text>
+                                <text x="186" y="128" fill="#6b7280" font-size="9" text-anchor="middle" font-family="sans-serif">100</text>
+                            </svg>
+                            <div class="gauge-score-display">
+                                <span id="gaugeScoreNum" class="gauge-number">—</span>
+                                <span class="gauge-divider">/ 100</span>
+                            </div>
+                            <div id="gaugeLevelLabel" class="gauge-level-label">—</div>
+                            <p id="gaugeLevelDesc" class="gauge-level-desc"></p>
                         </div>
                     </div>
-
-                    <!-- Right: Circular Dial -->
-                    <div class="glass-card dial-gauge-card">
-                        <div class="circular-dial-container">
-                            <svg class="dial-svg" viewBox="0 0 160 160">
-                                <circle class="dial-track" cx="80" cy="80" r="70"></circle>
-                                <circle class="dial-fill" cx="80" cy="80" r="70"></circle>
-                            </svg>
-                            <div class="dial-text-wrapper">
-                                <span id="dialPercentage" class="dial-percentage-val">0%</span>
-                                <span class="dial-lbl">Severity</span>
+                    <div>
+                        <h3 class="score-section-title">What does this mean?</h3>
+                        <p class="legend-desc">The Overall Bias Score (0–100) represents the aggregated level of bias detected across multiple dimensions in the content, response, or decision.</p>
+                        <div class="legend-table">
+                            <div class="legend-row">
+                                <span class="legend-dot" style="background:#22c55e"></span>
+                                <span class="legend-range">0 – 25</span>
+                                <span class="legend-name low">Low Bias</span>
+                                <span class="legend-detail">Minimal to no signs of bias.</span>
+                            </div>
+                            <div class="legend-row">
+                                <span class="legend-dot" style="background:#eab308"></span>
+                                <span class="legend-range">26 – 50</span>
+                                <span class="legend-name moderate">Moderate Bias</span>
+                                <span class="legend-detail">Some bias present; review recommended.</span>
+                            </div>
+                            <div class="legend-row">
+                                <span class="legend-dot" style="background:#f97316"></span>
+                                <span class="legend-range">51 – 75</span>
+                                <span class="legend-name high">High Bias</span>
+                                <span class="legend-detail">Significant bias detected; action needed.</span>
+                            </div>
+                            <div class="legend-row">
+                                <span class="legend-dot" style="background:#ef4444"></span>
+                                <span class="legend-range">76 – 100</span>
+                                <span class="legend-name severe">Severe Bias</span>
+                                <span class="legend-detail">Strong bias detected; immediate mitigation recommended.</span>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Explanation & RAG Contrast -->
+            <!-- 2. Bias Breakdown by Type -->
+            <div class="glass-card">
+                <h3 class="score-section-title">Bias Breakdown by Type <span class="info-icon"><i class="fa-solid fa-circle-info"></i></span></h3>
+                <p class="breakdown-subtitle">Scores represent the intensity of bias detected for each category (0 = None, 100 = Extreme)</p>
+                <div class="breakdown-header">
+                    <span>Bias Type</span>
+                    <span>Intensity (0–100)</span>
+                    <span>Level</span>
+                </div>
+                <div id="breakdownRows"></div>
+                <p class="breakdown-footnote"><i class="fa-solid fa-circle-info"></i> Scores are derived from classifier confidence weighted by overall bias intensity.</p>
+            </div>
+
+            <!-- 3. Context + Mitigation Guide -->
+            <div class="info-panels-grid">
                 <div class="glass-card">
-                    <h3 class="section-header-styled"><i class="fa-solid fa-magnifying-glass-chart"></i> Explanatory Analysis & Contrast</h3>
-                    <div id="answerAnalysis" class="analysis-content">
-                        <!-- Populated dynamically -->
+                    <div class="info-panel-header">
+                        <div class="info-panel-icon" style="background:rgba(139,92,246,0.2);color:#a78bfa"><i class="fa-solid fa-book-open"></i></div>
+                        <h3>Context: Why Bias Matters</h3>
                     </div>
+                    <p class="info-panel-desc">Bias can influence decisions, recommendations, and interactions in ways that may be unfair, inaccurate, or harmful. It can affect individuals and groups, reduce trust, and lead to unethical or inequitable outcomes.</p>
+                    <p class="info-panel-highlight">Common impacts include:</p>
+                    <ul class="info-panel-list">
+                        <li><i class="fa-solid fa-circle-check"></i> Unfair treatment of individuals or groups</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Reduced diversity and inclusion</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Loss of trust and credibility</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Legal and reputational risks</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Poor decision quality</li>
+                    </ul>
                 </div>
-
-                <!-- Dialogue Contrast Cards -->
-                <div class="contrast-layout-grid">
-                    <!-- Left: Original Dialogue -->
-                    <div class="dialogue-card original">
-                        <div class="dialogue-header original-text">
-                            <span><i class="fa-solid fa-triangle-exclamation"></i> Original Dialogue</span>
-                        </div>
-                        <div id="originalDialogueBody" class="dialogue-body">
-                            <!-- Populated dynamically -->
-                        </div>
+                <div class="glass-card">
+                    <div class="info-panel-header">
+                        <div class="info-panel-icon" style="background:rgba(34,197,94,0.2);color:#4ade80"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h3>How to Mitigate Bias</h3>
                     </div>
-
-                    <!-- Right: Mitigated Neutral Reframing -->
-                    <div class="dialogue-card mitigated">
-                        <div class="dialogue-header mitigated-text">
-                            <span><i class="fa-solid fa-shield-halved"></i> Mitigated Neutral Dialogue</span>
+                    <div class="mitigation-steps">
+                        <div class="mitigation-step">
+                            <div class="step-icon" style="background:rgba(34,197,94,0.15);color:#4ade80"><i class="fa-solid fa-eye"></i></div>
+                            <div><strong>1. Awareness</strong><p>Understand your own biases and how they can influence outcomes.</p></div>
                         </div>
-                        <div id="mitigatedDialogueBody" class="dialogue-body">
-                            <!-- Populated dynamically -->
+                        <div class="mitigation-step">
+                            <div class="step-icon" style="background:rgba(96,165,250,0.15);color:#60a5fa"><i class="fa-solid fa-people-group"></i></div>
+                            <div><strong>2. Diversify Data &amp; Perspectives</strong><p>Use inclusive, representative data and seek multiple viewpoints.</p></div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Double-Contrast Dialogue References -->
-                <div class="ref-box-container">
-                    <div class="ref-box zero-bias">
-                        <div class="ref-box-title">
-                            <i class="fa-solid fa-circle-check"></i> Zero Bias Reference (0%)
+                        <div class="mitigation-step">
+                            <div class="step-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa"><i class="fa-solid fa-magnifying-glass"></i></div>
+                            <div><strong>3. Review &amp; Validate</strong><p>Regularly audit outputs and decisions for bias using metrics and human review.</p></div>
                         </div>
-                        <div id="zeroRefText" class="ref-box-text">
-                            <!-- Populated dynamically -->
+                        <div class="mitigation-step">
+                            <div class="step-icon" style="background:rgba(251,191,36,0.15);color:#fbbf24"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <div><strong>4. Apply Fairness Techniques</strong><p>Use debiasing methods, constraints, and fairness-aware models where possible.</p></div>
                         </div>
-                    </div>
-                    <div class="ref-box extreme-bias">
-                        <div class="ref-box-title">
-                            <i class="fa-solid fa-circle-xmark"></i> Extreme Bias Reference (100%)
-                        </div>
-                        <div id="extremeRefText" class="ref-box-text">
-                            <!-- Populated dynamically -->
+                        <div class="mitigation-step">
+                            <div class="step-icon" style="background:rgba(248,113,113,0.15);color:#f87171"><i class="fa-solid fa-arrows-rotate"></i></div>
+                            <div><strong>5. Iterate &amp; Monitor</strong><p>Continuously monitor bias scores and improve processes over time.</p></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Source Contexts -->
-                <div class="section-header-styled" style="border: none; margin-bottom: 0.5rem;">
-                    <i class="fa-solid fa-database"></i> Source Contexts Retained from Knowledge Base
-                </div>
-                <div id="sourceContexts" class="source-grid">
-                    <!-- Populated dynamically -->
-                </div>
-
             </div>
 
-            <!-- Knowledge Graph Sample Image -->
-            {% if knowledge_graph_image %}
-            <div class="graph-wrapper">
-                <h2><i class="fa-solid fa-diagram-project"></i> Knowledge Base Visualization</h2>
-                <p>Below is a dynamic sample subgraph of our ethical scenario knowledge graph, showcasing similarity links between distinct bias groups.</p>
-                <div class="graph-image-container">
-                    <img src="{{ url_for('serve_static', filename=knowledge_graph_image.split('/')[-1]) }}" alt="Bias Scenario Knowledge Graph Subgraph">
+            <!-- 4. Collapsible Analysis Sections (default closed) -->
+            <div class="collapse-group">
+
+                <!-- 4a. Analysis Verdict -->
+                <div class="collapse-section" id="col-verdict">
+                    <div class="collapse-header" onclick="toggleCollapse('col-verdict')">
+                        <div class="collapse-title">
+                            <i class="fa-solid fa-circle-nodes pulse-light" style="color:var(--accent-cyan)"></i>
+                            <span id="biasTypeBadge" class="glowing-badge-sm">N/A</span>
+                            Analysis Verdict
+                        </div>
+                        <i class="fa-solid fa-chevron-down collapse-arrow"></i>
+                    </div>
+                    <div class="collapse-body-wrapper">
+                        <div class="collapse-body">
+                            <div id="answerVerdict" class="verdict-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4b. Explanatory Analysis -->
+                <div class="collapse-section" id="col-analysis">
+                    <div class="collapse-header" onclick="toggleCollapse('col-analysis')">
+                        <div class="collapse-title">
+                            <i class="fa-solid fa-magnifying-glass-chart" style="color:var(--accent-purple)"></i>
+                            Explanatory Analysis &amp; Contrast
+                        </div>
+                        <i class="fa-solid fa-chevron-down collapse-arrow"></i>
+                    </div>
+                    <div class="collapse-body-wrapper">
+                        <div class="collapse-body">
+                            <div id="answerAnalysis" class="analysis-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4c. Original Dialogue -->
+                <div class="collapse-section" id="col-original">
+                    <div class="collapse-header" onclick="toggleCollapse('col-original')">
+                        <div class="collapse-title" style="color:var(--accent-rose)">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            Original Dialogue
+                        </div>
+                        <i class="fa-solid fa-chevron-down collapse-arrow"></i>
+                    </div>
+                    <div class="collapse-body-wrapper">
+                        <div class="collapse-body">
+                            <div id="originalDialogueBody" class="dialogue-body"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4d. Mitigated Dialogue -->
+                <div class="collapse-section" id="col-mitigated">
+                    <div class="collapse-header" onclick="toggleCollapse('col-mitigated')">
+                        <div class="collapse-title" style="color:var(--accent-green)">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            Mitigated Neutral Dialogue
+                        </div>
+                        <i class="fa-solid fa-chevron-down collapse-arrow"></i>
+                    </div>
+                    <div class="collapse-body-wrapper">
+                        <div class="collapse-body">
+                            <div id="mitigatedDialogueBody" class="dialogue-body"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- end collapse-group -->
+
+            <!-- 5. References (collapse, default closed) -->
+            <div class="collapse-section" id="col-references" style="margin-bottom:1.5rem;">
+                <div class="collapse-header" onclick="toggleCollapse('col-references')">
+                    <div class="collapse-title">
+                        <i class="fa-solid fa-book" style="color:var(--accent-amber)"></i>
+                        References — Bias Anchoring Examples
+                    </div>
+                    <i class="fa-solid fa-chevron-down collapse-arrow"></i>
+                </div>
+                <div class="collapse-body-wrapper">
+                    <div class="collapse-body">
+                        <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem;">The following examples were retrieved from the knowledge graph to anchor the analysis at the two extremes of the bias spectrum.</p>
+                        <div class="ref-box-container">
+                            <div class="ref-box zero-bias">
+                                <div class="ref-box-title"><i class="fa-solid fa-circle-check"></i> Zero Bias Reference (0%)</div>
+                                <div id="zeroRefText" class="ref-box-text"></div>
+                            </div>
+                            <div class="ref-box extreme-bias">
+                                <div class="ref-box-title"><i class="fa-solid fa-circle-xmark"></i> Extreme Bias Reference (100%)</div>
+                                <div id="extremeRefText" class="ref-box-text"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            {% endif %}
-        </main>
-    </div>
 
-    <!-- AJAX Handling and Custom UI Animations -->
-    <script>
-        // Set up references
-        const userInputTextarea = document.getElementById('userInput');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const spinner = document.getElementById('spinner');
-        const resultsSection = document.getElementById('results');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
+            <!-- 6. Source Contexts -->
+            <div class="source-section-label">
+                <i class="fa-solid fa-database"></i> Source Contexts from Knowledge Base
+            </div>
+            <div id="sourceContexts" class="source-grid"></div>
 
-        // Circular Dial Update Function
-        function updateDialGauge(percentageVal) {
-            const circle = document.querySelector('.dial-fill');
-            const percentLabel = document.getElementById('dialPercentage');
-            
-            const radius = 70;
-            const circumference = 2 * Math.PI * radius; // 439.82
-            
-            // Map percentage to stroke-dashoffset
-            const offset = circumference - (percentageVal * circumference);
-            circle.style.strokeDashoffset = offset;
+            <!-- Footer -->
+            <div class="dashboard-footer-note">
+                <i class="fa-solid fa-lightbulb"></i>
+                Bias detection is an ongoing process. Combine technology, human judgment, and inclusive practices to build fair and responsible systems.
+            </div>
 
-            // Determine dial color depending on severity level
-            let color = 'var(--accent-cyan)';
-            if (percentageVal >= 0.70) {
-                color = 'var(--accent-rose)';
-            } else if (percentageVal >= 0.40) {
-                color = 'var(--accent-amber)';
-            } else if (percentageVal >= 0.15) {
-                color = 'var(--accent-cyan)';
-            } else {
-                color = 'var(--accent-green)';
-            }
-            circle.style.stroke = color;
-            circle.style.filter = `drop-shadow(0 0 8px ${color})`;
+        </div><!-- end #results -->
 
-            // Count Up Number animation
-            let start = 0;
-            const end = Math.round(percentageVal * 100);
-            
-            if (end === 0) {
-                percentLabel.textContent = '0%';
-                percentLabel.style.color = '#fff';
-                return;
-            }
+        <!-- Knowledge Graph — Interactive D3.js -->
+        <div class="graph-wrapper" id="graphSection">
+            <div class="graph-header">
+                <div class="graph-header-left">
+                    <h2><i class="fa-solid fa-diagram-project"></i> Knowledge Base Graph</h2>
+                    <p>Interactive force-directed graph of the bias knowledge base. Scroll to zoom · Drag to pan · Hover nodes for details · Filter by type.</p>
+                </div>
+                <div id="graphControls" class="graph-controls"></div>
+            </div>
 
-            const duration = 1200; // ms
-            const stepTime = Math.max(Math.floor(duration / end), 15);
-            
-            const timer = setInterval(() => {
-                start++;
-                percentLabel.textContent = `${start}%`;
-                if (start >= end) {
-                    clearInterval(timer);
-                }
-            }, stepTime);
+            <div class="graph-container">
+                <div id="graphLoading" class="graph-loading">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Loading knowledge graph…
+                </div>
+                <svg id="knowledgeGraphSvg"></svg>
+                <div id="graphTooltip" class="graph-tooltip"></div>
+            </div>
+
+            <div class="graph-footer">
+                <div class="graph-stats">
+                    <span><i class="fa-solid fa-circle-nodes"></i> <span id="graphNodeCount">—</span> nodes</span>
+                    <span><i class="fa-solid fa-code-branch"></i> <span id="graphEdgeCount">—</span> edges</span>
+                </div>
+                <div class="graph-legend-row">
+                    <div class="graph-legend-item">
+                        <div class="graph-legend-dot scenario" style="background:rgba(255,255,255,0.15)"></div> Scenario
+                    </div>
+                    <div class="graph-legend-item">
+                        <div class="graph-legend-dot" style="background:#22c55e"></div> Low Bias Dialogue (0%)
+                    </div>
+                    <div class="graph-legend-item">
+                        <div class="graph-legend-dot" style="background:#ef4444"></div> High Bias Dialogue (100%)
+                    </div>
+                    <div class="graph-legend-item" style="color:var(--text-muted);font-size:0.72rem">
+                        <span style="letter-spacing:2px;margin-right:4px">— —</span> Cross-type similarity
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // ---- DOM refs ----
+    const userInputTextarea = document.getElementById('userInput');
+    const analyzeBtn        = document.getElementById('analyzeBtn');
+    const spinner           = document.getElementById('spinner');
+    const resultsSection    = document.getElementById('results');
+    const errorMessage      = document.getElementById('errorMessage');
+    const errorText         = document.getElementById('errorText');
+
+    // ---- Collapse toggle ----
+    function toggleCollapse(id) {
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    // ---- Gauge ----
+    const GAUGE_CX = 100, GAUGE_CY = 115, GAUGE_R = 82, GAUGE_NEEDLE_R = 70;
+
+    function gaugePoint(score) {
+        const angle = Math.PI * (1 - score / 100);
+        return { x: GAUGE_CX + GAUGE_R * Math.cos(angle), y: GAUGE_CY - GAUGE_R * Math.sin(angle) };
+    }
+
+    function needlePoint(score) {
+        const angle = Math.PI * (1 - score / 100);
+        return { x: GAUGE_CX + GAUGE_NEEDLE_R * Math.cos(angle), y: GAUGE_CY - GAUGE_NEEDLE_R * Math.sin(angle) };
+    }
+
+    function getLevelInfo(score) {
+        if (score <= 25) return { label: 'Low Bias',             desc: 'Minimal to no signs of bias detected in the dialogue.',                                                color: '#22c55e' };
+        if (score <= 50) return { label: 'Moderate Bias Detected', desc: 'Some bias is present. Review the breakdown below for contributing factors.',                        color: '#eab308' };
+        if (score <= 75) return { label: 'High Bias Detected',    desc: 'The system output shows a high level of bias. Review the breakdown below to understand contributing factors.', color: '#f97316' };
+        return                  { label: 'Severe Bias Detected',  desc: 'Strong bias detected. Immediate review and mitigation are strongly recommended.',                    color: '#ef4444' };
+    }
+
+    function updateGauge(score) {
+        const lv = getLevelInfo(score);
+        const needle     = document.getElementById('gaugeNeedle');
+        const center     = document.getElementById('gaugeCenter');
+        const activeFill = document.getElementById('gaugeActiveFill');
+        const numEl      = document.getElementById('gaugeScoreNum');
+        const labelEl    = document.getElementById('gaugeLevelLabel');
+        const descEl     = document.getElementById('gaugeLevelDesc');
+
+        if (score > 0) {
+            const s = gaugePoint(0);
+            const e = gaugePoint(score);
+            activeFill.setAttribute('d', `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${GAUGE_R} ${GAUGE_R} 0 ${score > 50 ? 1 : 0} 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`);
+            activeFill.setAttribute('stroke', lv.color);
+            activeFill.style.opacity = '0.9';
         }
 
-        // Markdown Segment Splitting and Parsing for Gemma 3
-        function parseGenerativeResponse(text) {
-            const parsed = {
-                verdict: '',
-                analysis: '',
-                mitigation: ''
-            };
+        const np = needlePoint(score);
+        if (needle) { needle.setAttribute('x2', np.x.toFixed(2)); needle.setAttribute('y2', np.y.toFixed(2)); needle.style.opacity = '1'; }
+        if (center) center.style.opacity = '1';
 
-            // Split by section headers
-            const sections = text.split(/###\s+/);
+        let current = 0;
+        const end = Math.round(score);
+        if (numEl) numEl.style.color = lv.color;
+        if (end === 0) {
+            if (numEl) numEl.textContent = '0';
+        } else {
+            const timer = setInterval(() => {
+                current++;
+                if (numEl) numEl.textContent = current;
+                if (current >= end) { clearInterval(timer); if (numEl) numEl.textContent = end; }
+            }, Math.max(Math.floor(1200 / end), 10));
+        }
 
-            sections.forEach(section => {
-                const lines = section.trim().split('\n');
-                if (lines.length === 0 || !lines[0]) return;
+        if (labelEl) { labelEl.textContent = lv.label; labelEl.style.color = lv.color; }
+        if (descEl) descEl.textContent = lv.desc;
+    }
 
-                const header = lines[0].toLowerCase();
-                const content = lines.slice(1).join('\n').trim();
+    // ---- Bias type metadata ----
+    const BIAS_TYPE_META = {
+        "1_personal_identity":           { icon: "fa-person",           bg: "rgba(124,58,237,0.2)",  color: "#a78bfa", desc: "Bias based on age, gender, race, ethnicity, disability, etc." },
+        "2_social_bias":                 { icon: "fa-users",            bg: "rgba(37,99,235,0.2)",   color: "#60a5fa", desc: "Prejudice toward social groups, communities, or demographics." },
+        "3_professional_and_educational":{ icon: "fa-briefcase",        bg: "rgba(8,145,178,0.2)",   color: "#22d3ee", desc: "Favoritism based on education, credentials, or career background." },
+        "4_behavioural_and_psychological":{ icon: "fa-brain",           bg: "rgba(107,33,168,0.2)",  color: "#c4b5fd", desc: "Cognitive shortcuts and mental biases affecting judgment." },
+        "5_situational_and_contexual":   { icon: "fa-map-location-dot", bg: "rgba(180,83,9,0.2)",    color: "#fb923c", desc: "Bias influenced by context, environment, or circumstances." },
+        "6_intersectional_and_compound": { icon: "fa-layer-group",      bg: "rgba(190,24,93,0.2)",   color: "#f472b6", desc: "Overlapping biases from multiple identity factors combined." },
+        "7_technological_and_media":     { icon: "fa-microchip",        bg: "rgba(29,78,216,0.2)",   color: "#93c5fd", desc: "Algorithmic and media-driven bias in digital systems." },
+        "8_health_and_wellness":         { icon: "fa-heart-pulse",      bg: "rgba(220,38,38,0.2)",   color: "#f87171", desc: "Prejudice in healthcare, medical decisions, or wellness." },
+        "9_culture_and_regional":        { icon: "fa-earth-americas",   bg: "rgba(21,128,61,0.2)",   color: "#4ade80", desc: "Stereotypes based on cultural background or geographic origin." },
+        "10_behavioural_bias_indicators":{ icon: "fa-chart-line",       bg: "rgba(217,119,6,0.2)",   color: "#fbbf24", desc: "Observable patterns indicating underlying biased behavior." },
+        "11_misc":                       { icon: "fa-circle-question",  bg: "rgba(107,114,128,0.2)", color: "#9ca3af", desc: "Other forms of bias not classified in primary categories." }
+    };
 
-                if (header.includes('verdict') || header.includes('severity') || header.includes('🚨')) {
-                    parsed.verdict = content;
-                } else if (header.includes('analysis') || header.includes('contrast') || header.includes('🔍')) {
-                    parsed.analysis = content;
-                } else if (header.includes('mitigation') || header.includes('reframed') || header.includes('neutral') || header.includes('🩹')) {
-                    parsed.mitigation = content;
-                }
+    function getLevelBadge(score) {
+        if (score <= 25) return { label: 'Low',      cls: 'low',      color: '#22c55e' };
+        if (score <= 50) return { label: 'Moderate', cls: 'moderate', color: '#eab308' };
+        if (score <= 75) return { label: 'High',     cls: 'high',     color: '#f97316' };
+        return                  { label: 'Severe',   cls: 'severe',   color: '#ef4444' };
+    }
+
+    function buildBreakdownRows(typeBreakdown) {
+        const container = document.getElementById('breakdownRows');
+        if (!container || !typeBreakdown) return;
+        container.innerHTML = '';
+
+        typeBreakdown.forEach(item => {
+            const meta = BIAS_TYPE_META[item.type] || { icon: 'fa-circle-question', bg: 'rgba(107,114,128,0.2)', color: '#9ca3af', desc: '' };
+            const lv   = getLevelBadge(item.score);
+            const row  = document.createElement('div');
+            row.className = 'breakdown-row';
+            row.innerHTML = `
+                <div class="bias-type-cell">
+                    <div class="bias-type-icon" style="background:${meta.bg};color:${meta.color}"><i class="fa-solid ${meta.icon}"></i></div>
+                    <div>
+                        <div class="type-name">${item.display}</div>
+                        <div class="type-desc">${meta.desc}</div>
+                    </div>
+                </div>
+                <div class="bar-cell">
+                    <div class="bar-track"><div class="bar-fill" style="background:${lv.color}" data-target="${item.score}"></div></div>
+                    <span class="bar-score">${item.score}</span>
+                </div>
+                <div><span class="level-badge ${lv.cls}">${lv.label}</span></div>
+            `;
+            container.appendChild(row);
+        });
+
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                container.querySelectorAll('.bar-fill').forEach(bar => { bar.style.width = bar.dataset.target + '%'; });
+            }, 80);
+        });
+    }
+
+    // ---- Dialogue formatter ----
+    // Detects Interviewer/Candidate speaker patterns and renders chat bubbles
+    const SPEAKER_RE = /^(Interviewer|Candidate|Recruiter|HR|Manager|Employee|Interviewee|Hiring\s*Manager|Speaker\s*\d*|Q|A)\s*:/i;
+    const INTERVIEWER_RE = /^(Interviewer|Recruiter|HR|Manager|Hiring\s*Manager|Q)\s*:/i;
+
+    function splitConversation(text) {
+        // Strategy 1: comma-separated quoted strings like "Speaker: ...", "Speaker: ..."
+        if (text.includes('", "') || text.includes('","')) {
+            const parts = text.split(/",\s*"/);
+            return parts.map(p => p.replace(/^["']|["']$/g, '').trim()).filter(Boolean);
+        }
+        // Strategy 2: newline-separated
+        const byLine = text.split(/\n+/).filter(s => s.trim());
+        if (byLine.length > 1 && byLine.some(l => SPEAKER_RE.test(l.trim()))) {
+            return byLine.map(l => l.trim().replace(/^["']|["']$/g, '').trim()).filter(Boolean);
+        }
+        // Strategy 3: split on speaker pattern inline
+        const inline = text.split(/(?=(?:Interviewer|Candidate|Recruiter|HR|Manager|Employee|Interviewee|Hiring\s*Manager)\s*:)/i);
+        if (inline.length > 1) {
+            return inline.map(s => s.trim().replace(/^["']|["']$/g, '').trim()).filter(Boolean);
+        }
+        return null; // not a conversation
+    }
+
+    function formatOriginalDialogue(rawText, container) {
+        const cleaned = rawText.trim().replace(/^["']|["']$/g, '').trim();
+        const segments = splitConversation(cleaned);
+
+        if (!segments || !segments.some(s => SPEAKER_RE.test(s.trim()))) {
+            // Plain text
+            const p = document.createElement('div');
+            p.className = 'dialogue-plain';
+            p.textContent = rawText;
+            container.appendChild(p);
+            return;
+        }
+
+        const conv = document.createElement('div');
+        conv.className = 'dialogue-conversation';
+
+        segments.forEach(seg => {
+            seg = seg.trim().replace(/^["']|["']$/g, '').trim();
+            const match = seg.match(/^([\w][\w\s]*?)\s*:\s*([\s\S]*)/);
+            if (!match) return;
+
+            const speaker = match[1].trim();
+            const content = match[2].trim();
+            const isInterviewer = INTERVIEWER_RE.test(speaker + ':');
+
+            const bubble = document.createElement('div');
+            bubble.className = 'speech-bubble ' + (isInterviewer ? 'speech-interviewer' : 'speech-candidate');
+            bubble.innerHTML = `
+                <div class="speech-speaker">${speaker}</div>
+                <div class="speech-text">${escapeHtml(content)}</div>
+            `;
+            conv.appendChild(bubble);
+        });
+
+        if (conv.children.length === 0) {
+            // Fallback if no bubbles built
+            const p = document.createElement('div');
+            p.className = 'dialogue-plain';
+            p.textContent = rawText;
+            container.appendChild(p);
+        } else {
+            container.appendChild(conv);
+        }
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ---- LLM response parser ----
+    function parseGenerativeResponse(text) {
+        const parsed = { verdict: '', analysis: '', mitigation: '' };
+        const sections = text.split(/###\s+/);
+
+        sections.forEach(section => {
+            const lines = section.trim().split('\n');
+            if (!lines[0]) return;
+            const header  = lines[0].toLowerCase();
+            const content = lines.slice(1).join('\n').trim();
+            if      (header.includes('verdict') || header.includes('severity') || header.includes('🚨')) parsed.verdict  = content;
+            else if (header.includes('analysis') || header.includes('contrast') || header.includes('🔍')) parsed.analysis = content;
+            else if (header.includes('mitigation') || header.includes('reframed') || header.includes('neutral') || header.includes('🩹')) parsed.mitigation = content;
+        });
+
+        for (let key in parsed) parsed[key] = parsed[key].replace(/^["']|["']$/g, '').trim();
+        if (!parsed.verdict && !parsed.analysis && !parsed.mitigation) parsed.verdict = text;
+        return parsed;
+    }
+
+    function formatMarkdownToHTML(mdText) {
+        if (!mdText) return 'N/A';
+        let f = mdText
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
+            .replace(/\n/g, '<br>');
+        if (f.includes('<li>')) f = f.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+        return f;
+    }
+
+    // ---- Analyze click handler ----
+    // ======================================================
+    // KNOWLEDGE GRAPH — D3.js Interactive Visualization
+    // ======================================================
+    const TYPE_COLORS = {
+        "1_personal_identity":            "#a78bfa",
+        "2_social_bias":                  "#60a5fa",
+        "3_professional_and_educational": "#22d3ee",
+        "4_behavioural_and_psychological":"#c4b5fd",
+        "5_situational_and_contexual":    "#fb923c",
+        "6_intersectional_and_compound":  "#f472b6",
+        "7_technological_and_media":      "#93c5fd",
+        "8_health_and_wellness":          "#f87171",
+        "9_culture_and_regional":         "#4ade80",
+        "10_behavioural_bias_indicators": "#fbbf24",
+        "11_misc":                        "#9ca3af"
+    };
+
+    const TYPE_LABELS = {
+        "1_personal_identity":            "Personal Identity",
+        "2_social_bias":                  "Social Bias",
+        "3_professional_and_educational": "Professional & Edu.",
+        "4_behavioural_and_psychological":"Behavioural & Psych.",
+        "5_situational_and_contexual":    "Situational",
+        "6_intersectional_and_compound":  "Intersectional",
+        "7_technological_and_media":      "Tech & Media",
+        "8_health_and_wellness":          "Health & Wellness",
+        "9_culture_and_regional":         "Cultural & Regional",
+        "10_behavioural_bias_indicators": "Behav. Indicators",
+        "11_misc":                        "Miscellaneous"
+    };
+
+    function nodeColor(d) {
+        if (d.type === 'dialogue') {
+            const bl = d.bias_level;
+            if (bl === 0)   return '#22c55e';
+            if (bl === 100) return '#ef4444';
+            if (bl !== null && bl !== undefined) return bl < 50 ? '#eab308' : '#f97316';
+            return '#6b7280';
+        }
+        return TYPE_COLORS[d.bias_type] || '#6b7280';
+    }
+
+    function nodeRadius(d) { return d.type === 'scenario' ? 9 : 5; }
+
+    let graphLoaded = false;
+
+    async function loadKnowledgeGraph() {
+        if (graphLoaded) return;
+        const loadingEl = document.getElementById('graphLoading');
+        const svgEl     = document.getElementById('knowledgeGraphSvg');
+
+        try {
+            const res  = await fetch('/api/graph');
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            graphLoaded = true;
+            if (loadingEl) loadingEl.style.display = 'none';
+            renderKnowledgeGraph(data, svgEl);
+
+        } catch (err) {
+            if (loadingEl) {
+                loadingEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#f43f5e"></i> Failed to load graph: ${err.message}`;
+            }
+        }
+    }
+
+    function renderKnowledgeGraph(data, svgEl) {
+        const { nodes, edges } = data;
+
+        // Update stats
+        const nc = document.getElementById('graphNodeCount');
+        const ec = document.getElementById('graphEdgeCount');
+        if (nc) nc.textContent = nodes.length;
+        if (ec) ec.textContent = edges.length;
+
+        const container = svgEl.parentElement;
+        const width  = container.clientWidth  || 900;
+        const height = container.clientHeight || 580;
+
+        const svg = d3.select(svgEl);
+        svg.selectAll('*').remove();
+
+        // Zoom + pan
+        const g    = svg.append('g');
+        const zoom = d3.zoom().scaleExtent([0.08, 6])
+            .on('zoom', ev => g.attr('transform', ev.transform));
+        svg.call(zoom);
+
+        // Initial zoom-out so all nodes are visible
+        svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.55).translate(-width / 2, -height / 2));
+
+        // Force simulation
+        const simulation = d3.forceSimulation(nodes)
+            .force('link',    d3.forceLink(edges).id(d => d.id)
+                                  .distance(d => d.relationship === 'similar_to' ? 130 : 45)
+                                  .strength( d => d.relationship === 'similar_to' ? 0.08 : 0.6))
+            .force('charge',  d3.forceManyBody().strength(-80))
+            .force('center',  d3.forceCenter(width / 2, height / 2))
+            .force('collide', d3.forceCollide().radius(d => nodeRadius(d) + 4));
+
+        // Edges
+        const link = g.append('g').attr('class', 'links')
+            .selectAll('line').data(edges).join('line')
+            .attr('stroke',           d => d.relationship === 'similar_to' ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.13)')
+            .attr('stroke-width',     d => d.relationship === 'similar_to' ? 0.8 : 1.2)
+            .attr('stroke-dasharray', d => d.relationship === 'similar_to' ? '4,4' : null);
+
+        // Nodes
+        const node = g.append('g').attr('class', 'nodes')
+            .selectAll('circle').data(nodes).join('circle')
+            .attr('r',              d => nodeRadius(d))
+            .attr('fill',           d => nodeColor(d))
+            .attr('fill-opacity',   0.82)
+            .attr('stroke',         d => nodeColor(d))
+            .attr('stroke-width',   d => d.type === 'scenario' ? 2 : 1)
+            .attr('stroke-opacity', 0.45)
+            .style('cursor', 'pointer')
+            .call(d3.drag()
+                .on('start', (ev, d) => { if (!ev.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+                .on('drag',  (ev, d) => { d.fx = ev.x; d.fy = ev.y; })
+                .on('end',   (ev, d) => { if (!ev.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+            );
+
+        // Tooltip
+        const tooltip = document.getElementById('graphTooltip');
+
+        node.on('mouseenter', (ev, d) => {
+            const color     = nodeColor(d);
+            const typeLabel = d.type === 'dialogue'
+                ? `Dialogue`
+                : `Scenario — ${TYPE_LABELS[d.bias_type] || d.bias_type}`;
+            const biasInfo  = d.type === 'dialogue' && d.bias_level !== null && d.bias_level !== undefined
+                ? `<div class="tt-bias" style="color:${color}">Bias Level: ${d.bias_level}%</div>`
+                : `<div class="tt-bias" style="color:${color}">${TYPE_LABELS[d.bias_type] || ''}</div>`;
+
+            tooltip.innerHTML = `
+                <div class="tt-type" style="color:${color}">${typeLabel}</div>
+                ${biasInfo}
+                <div class="tt-text">${d.label || '—'}</div>
+            `;
+            tooltip.style.display = 'block';
+        });
+
+        node.on('mousemove', ev => {
+            const rect = container.getBoundingClientRect();
+            const x = ev.clientX - rect.left + 14;
+            const y = ev.clientY - rect.top  - 12;
+            tooltip.style.left = Math.min(x, rect.width  - 310) + 'px';
+            tooltip.style.top  = Math.max(y, 4)                 + 'px';
+        });
+
+        node.on('mouseleave', () => { tooltip.style.display = 'none'; });
+
+        // Highlight on hover
+        node.on('mouseenter.hl', (ev, d) => {
+            node.attr('fill-opacity', n => {
+                if (n === d) return 1;
+                // check if neighbour
+                const connected = edges.some(e =>
+                    (e.source === d || e.source.id === d.id) && (e.target === n || e.target.id === n.id) ||
+                    (e.target === d || e.target.id === d.id) && (e.source === n || e.source.id === n.id)
+                );
+                return connected ? 0.9 : 0.15;
+            });
+            link.attr('stroke-opacity', e => {
+                const s = e.source.id || e.source;
+                const t = e.target.id || e.target;
+                return (s === d.id || t === d.id) ? 0.85 : 0.04;
+            });
+        });
+
+        node.on('mouseleave.hl', () => {
+            node.attr('fill-opacity', 0.82);
+            link.attr('stroke-opacity', null);
+        });
+
+        // Tick
+        simulation.on('tick', () => {
+            link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+            node.attr('cx', d => d.x).attr('cy', d => d.y);
+        });
+
+        // Filter buttons
+        buildGraphFilters(nodes, node, link);
+    }
+
+    function buildGraphFilters(nodes, nodeSelection, linkSelection) {
+        const container = document.getElementById('graphControls');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const allTypes  = [...new Set(nodes.filter(n => n.type === 'scenario').map(n => n.bias_type))];
+        const enabled   = new Set(allTypes);
+
+        function updateVis() {
+            nodeSelection.attr('display', d => enabled.has(d.bias_type) ? null : 'none');
+            linkSelection.attr('display', e => {
+                const s = (e.source.bias_type || e.source);
+                const t = (e.target.bias_type || e.target);
+                return enabled.has(typeof s === 'string' ? s : s) && enabled.has(typeof t === 'string' ? t : t) ? null : 'none';
+            });
+        }
+
+        // "All" button
+        const allBtn = document.createElement('button');
+        allBtn.className = 'graph-filter-btn active';
+        allBtn.style.cssText = `border-color:rgba(255,255,255,0.3);color:#fff`;
+        allBtn.textContent = 'All';
+        allBtn.addEventListener('click', () => {
+            allTypes.forEach(t => enabled.add(t));
+            container.querySelectorAll('.graph-filter-btn').forEach(b => b.classList.add('active'));
+            updateVis();
+        });
+        container.appendChild(allBtn);
+
+        allTypes.forEach(bt => {
+            const color = TYPE_COLORS[bt] || '#9ca3af';
+            const btn   = document.createElement('button');
+            btn.className  = 'graph-filter-btn active';
+            btn.style.cssText = `border-color:${color};color:${color}`;
+            btn.textContent   = TYPE_LABELS[bt] || bt;
+            btn.dataset.type  = bt;
+
+            btn.addEventListener('click', () => {
+                if (enabled.has(bt)) { enabled.delete(bt); btn.classList.remove('active'); }
+                else                 { enabled.add(bt);    btn.classList.add('active');    }
+                updateVis();
+            });
+            container.appendChild(btn);
+        });
+    }
+
+    // Load graph when it scrolls into view
+    const graphObserver = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && !graphLoaded) loadKnowledgeGraph();
+    }, { threshold: 0.05 });
+
+    const graphSection = document.getElementById('graphSection');
+    if (graphSection) graphObserver.observe(graphSection);
+    // ======================================================
+
+    analyzeBtn.addEventListener('click', async () => {
+        const rawInput = userInputTextarea.value.trim();
+        if (!rawInput) {
+            errorMessage.style.display = 'flex';
+            errorText.textContent = 'Please provide a dialogue or scenario to analyze.';
+            return;
+        }
+
+        analyzeBtn.disabled = true;
+        spinner.style.display = 'flex';
+        resultsSection.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        // Reset all collapses to closed
+        ['col-verdict','col-analysis','col-original','col-mitigated','col-references'].forEach(id => {
+            document.getElementById(id).classList.remove('open');
+        });
+
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: rawInput })
             });
 
-            // Clean leading/trailing quotes if the model wrapped sections in double quotes
-            for (let key in parsed) {
-                parsed[key] = parsed[key].replace(/^["']|["']$/g, '').trim();
-            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Server error.');
 
-            // Fallback: If no segments matched, split by double line breaks
-            if (!parsed.verdict && !parsed.analysis && !parsed.mitigation) {
-                parsed.verdict = text;
-            }
+            // Reset gauge
+            document.getElementById('gaugeActiveFill').setAttribute('d', '');
+            document.getElementById('gaugeActiveFill').style.opacity = '0';
+            document.getElementById('gaugeNeedle').style.opacity = '0';
+            document.getElementById('gaugeCenter').style.opacity = '0';
+            document.getElementById('gaugeScoreNum').textContent = '0';
 
-            return parsed;
-        }
+            // Show results
+            resultsSection.style.display = 'block';
 
-        // Helper to format text markdown tags (like bold, lists, etc.) into basic safe HTML
-        function formatMarkdownToHTML(mdText) {
-            if (!mdText) return 'N/A';
-            let formatted = mdText
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
-                .replace(/\n/g, '<br>');
-            
-            // Wrap bullet items in ul
-            if (formatted.includes('<li>')) {
-                // simple hack to wrap consecutive list items
-                formatted = formatted.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
-            }
-            return formatted;
-        }
+            // Bias type badge
+            const displayType = data.bias_type_display || 'Neutral / N/A';
+            document.getElementById('biasTypeBadge').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${displayType}`;
 
-        // Trigger Evaluation Handler
-        analyzeBtn.addEventListener('click', async () => {
-            const rawInput = userInputTextarea.value.trim();
+            // Parse LLM output
+            const parsed = parseGenerativeResponse(data.answer);
+            document.getElementById('answerVerdict').innerHTML  = formatMarkdownToHTML(parsed.verdict  || 'No significant bias detected.');
+            document.getElementById('answerAnalysis').innerHTML = formatMarkdownToHTML(parsed.analysis || 'The text matches ethical standards.');
 
-            if (!rawInput) {
-                errorMessage.style.display = 'flex';
-                errorText.textContent = 'Please provide dialogue or a scenario statement to analyze.';
-                return;
-            }
+            // Original dialogue (formatted)
+            const origContainer = document.getElementById('originalDialogueBody');
+            origContainer.innerHTML = '';
+            formatOriginalDialogue(rawInput, origContainer);
 
-            // UI State Reset
-            analyzeBtn.disabled = true;
-            spinner.style.display = 'flex';
-            resultsSection.style.display = 'none';
-            errorMessage.style.display = 'none';
+            // Mitigated dialogue
+            const mitigContainer = document.getElementById('mitigatedDialogueBody');
+            mitigContainer.innerHTML = '';
+            let neutralMitigation = (parsed.mitigation || 'Dialogue is neutral and requires no mitigation.').replace(/^"|"$/g,'').trim();
+            const mitigBlock = document.createElement('div');
+            mitigBlock.className = 'mitigated-text-block';
+            mitigBlock.innerHTML = formatMarkdownToHTML(neutralMitigation);
+            mitigContainer.appendChild(mitigBlock);
 
-            try {
-                const response = await fetch('/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: rawInput })
+            // References
+            document.getElementById('zeroRefText').textContent    = data.no_bias_example    || 'N/A';
+            document.getElementById('extremeRefText').textContent = data.extreme_bias_example || 'N/A';
+
+            // Source contexts
+            const sourceContainer = document.getElementById('sourceContexts');
+            sourceContainer.innerHTML = '';
+            if (data.source_contexts && data.source_contexts.length > 0 && data.source_contexts[0] !== 'No context found.') {
+                data.source_contexts.forEach((ctx, i) => {
+                    const card = document.createElement('div');
+                    card.className = 'source-card';
+                    card.innerHTML = `<div class="source-card-header"><i class="fa-solid fa-cube"></i> Scenario Reference ${i + 1}</div><div class="source-card-body">${escapeHtml(ctx)}</div>`;
+                    sourceContainer.appendChild(card);
                 });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Server processing error occurred.');
-                }
-
-                // 1. Set Bias Badge Type
-                const displayType = data.bias_type_display || 'Neutral / N/A';
-                document.getElementById('biasType').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${displayType}`;
-
-                // 2. Parse Gemma 3 Output Sections
-                const parsedOutput = parseGenerativeResponse(data.answer);
-
-                // 3. Render Verdict
-                const verdictHtml = formatMarkdownToHTML(parsedOutput.verdict || 'No significant bias detected.');
-                document.getElementById('answerVerdict').innerHTML = verdictHtml;
-
-                // 4. Render Explanatory Analysis
-                const analysisHtml = formatMarkdownToHTML(parsedOutput.analysis || 'The text matches ethical standards.');
-                document.getElementById('answerAnalysis').innerHTML = analysisHtml;
-
-                // 5. Populate Comparison Dialogues
-                document.getElementById('originalDialogueBody').textContent = rawInput;
-                
-                // Clean the mitigation text from dialogue wrappers
-                let neutralMitigation = parsedOutput.mitigation || 'Dialogue is neutral and requires no mitigation.';
-                neutralMitigation = neutralMitigation.replace(/^"|"$/g, '').trim();
-                document.getElementById('mitigatedDialogueBody').textContent = neutralMitigation;
-
-                // 6. Set Double-Contrast References
-                document.getElementById('zeroRefText').textContent = data.no_bias_example || 'N/A';
-                document.getElementById('extremeRefText').textContent = data.extreme_bias_example || 'N/A';
-
-                // 7. Render Source Context Cards
-                const sourceContainer = document.getElementById('sourceContexts');
-                sourceContainer.innerHTML = ''; // clear prior sources
-
-                if (data.source_contexts && data.source_contexts.length > 0 && data.source_contexts[0] !== 'No context found.') {
-                    data.source_contexts.forEach((contextText, i) => {
-                        const card = document.createElement('div');
-                        card.className = 'source-card';
-                        card.innerHTML = `
-                            <div class="source-card-header">
-                                <i class="fa-solid fa-cube"></i> Scenario Reference ${i + 1}
-                            </div>
-                            <div class="source-card-body">${contextText}</div>
-                        `;
-                        sourceContainer.appendChild(card);
-                    });
-                } else {
-                    const fallbackCard = document.createElement('div');
-                    fallbackCard.className = 'source-card';
-                    fallbackCard.style.gridColumn = '1 / -1';
-                    fallbackCard.innerHTML = `
-                        <div class="source-card-header" style="color: var(--text-muted);">
-                            <i class="fa-solid fa-box-open"></i> No Base Scenario Contexts Matches
-                        </div>
-                        <div class="source-card-body" style="color: var(--text-muted); font-style: italic;">No specific dialogue matching bias categories was retrieved from the database.</div>
-                    `;
-                    sourceContainer.appendChild(fallbackCard);
-                }
-
-                // 8. Show Results Container
-                resultsSection.style.display = 'block';
-
-                // 9. Animate Dial Score
-                const finalScore = parseFloat(data.bias_score) || 0.0;
-                // Animate Dial after container is visible so transitions trigger correctly
-                setTimeout(() => {
-                    updateDialGauge(finalScore);
-                }, 50);
-
-            } catch (err) {
-                console.error(err);
-                errorMessage.style.display = 'flex';
-                errorText.textContent = `Analysis failed: ${err.message}`;
-            } finally {
-                analyzeBtn.disabled = false;
-                spinner.style.display = 'none';
+            } else {
+                const fb = document.createElement('div');
+                fb.className = 'source-card';
+                fb.style.gridColumn = '1 / -1';
+                fb.innerHTML = `<div class="source-card-header" style="color:var(--text-muted)"><i class="fa-solid fa-box-open"></i> No Base Scenario Contexts Matched</div><div class="source-card-body" style="color:var(--text-muted);font-style:italic">No specific dialogue matching bias categories was retrieved from the database.</div>`;
+                sourceContainer.appendChild(fb);
             }
-        });
-    </script>
+
+            // Animate gauge + breakdown
+            const finalScore = Math.round(parseFloat(data.bias_score) * 100);
+            setTimeout(() => {
+                updateGauge(finalScore);
+                buildBreakdownRows(data.type_breakdown);
+            }, 80);
+
+        } catch (err) {
+            console.error(err);
+            errorMessage.style.display = 'flex';
+            errorText.textContent = `Analysis failed: ${err.message}`;
+            resultsSection.style.display = 'none';
+        } finally {
+            analyzeBtn.disabled = false;
+            spinner.style.display = 'none';
+        }
+    });
+</script>
 </body>
 </html>

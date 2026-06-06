@@ -1,4 +1,17 @@
+import os
 import torch
+from dotenv import load_dotenv
+
+load_dotenv()  # Load variables from .env into os.environ
+
+# --- HF Environment Setup (must happen before any huggingface_hub / transformers import) ---
+_hf_cache = os.path.join(os.getcwd(), os.environ.get("HF_CACHE_DIR", "@.hf_cache"))
+os.makedirs(_hf_cache, exist_ok=True)
+os.environ.setdefault("HF_HOME", _hf_cache)
+os.environ.setdefault("HUGGINGFACE_HUB_CACHE", _hf_cache)
+# Propagate HF_TOKEN as the legacy var name some HF libs still read
+if os.environ.get("HF_TOKEN") and not os.environ.get("HUGGING_FACE_HUB_TOKEN"):
+    os.environ["HUGGING_FACE_HUB_TOKEN"] = os.environ["HF_TOKEN"]
 
 # --- File Paths ---
 DATA_DIR = "dataset"

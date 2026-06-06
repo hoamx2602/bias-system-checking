@@ -1,4 +1,6 @@
 import os
+import config  # loads .env and configures HF environment variables
+
 import json
 import warnings
 import shutil
@@ -12,21 +14,13 @@ from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, matthews_corrcoef, balanced_accuracy_score,
     classification_report
 )
-import config
 
 # Suppress common warnings
 warnings.filterwarnings("ignore", message=".*symlinks.")
 warnings.filterwarnings("ignore", message=".*pin_memory.*")
 warnings.filterwarnings("ignore", message=".*Xet Storage.*")
 
-# Configure Hugging Face cache directory before importing heavy modules
-cache_dir = os.path.join(os.getcwd(), "@.hf_cache")
-os.environ["HF_HOME"] = cache_dir
-os.environ["HUGGINGFACE_HUB_CACHE"] = cache_dir
-os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
-os.environ["HF_HUB_DISABLE_HARDLINKS"] = "1"
-os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
-os.environ["HF_HUB_OFFLINE"] = "1"  # Prevent additional downloads
+os.environ["HF_HUB_OFFLINE"] = "1"  # Use cached models only during training
 
 class WeightedTrainer(Trainer):
     def __init__(self, class_weights=None, *args, **kwargs):
@@ -291,15 +285,15 @@ def main():
     
     # --- 2. Initialize Tokenizer ---
     print("\n--- Step 2: Initializing Tokenizer ---")
-    cache_dir = os.path.join(os.getcwd(), "@.hf_cache")
+    cache_dir = os.environ.get("HF_HOME")
     model_kwargs = {"cache_dir": cache_dir}
     print(f"Models will be cached to: {cache_dir}")
     tokenizer = AutoTokenizer.from_pretrained(config.CLASSIFIER_MODEL, **model_kwargs)
-    
+
     # Create datasets
     train_int_dataset = BiasMultiDataset(train_texts, train_int_labels, tokenizer, is_regression=True)
     val_int_dataset = BiasMultiDataset(val_texts, val_int_labels, tokenizer, is_regression=True)
-    
+
     train_type_dataset = BiasMultiDataset(train_texts, train_type_labels, tokenizer, is_regression=False)
     val_type_dataset = BiasMultiDataset(val_texts, val_type_labels, tokenizer, is_regression=False)
 
@@ -308,9 +302,14 @@ def main():
     os.makedirs(config.LOGS_DIR, exist_ok=True)
     os.makedirs(config.EVALUATION_RESULTS_DIR, exist_ok=True)
 
-    # Setup hardware info
-    device_name = "cuda" if config.USE_CUDA else "cpu"
-    print(f"Using Device: {device_name}")
+    # Setup hardware info — re-check at runtime in case torch was reinstalled since config loaded
+    cuda_available = torch.cuda.is_available()
+    device_name = "cuda" if cuda_available else "cpu"
+    if cuda_available:
+        print(f"Using Device: cuda ({torch.cuda.get_device_name(0)})")
+    else:
+        print("Using Device: cpu  (WARNING: no CUDA GPU detected — training will be slow)")
+        print("If you have a GPU, install CUDA-enabled PyTorch: pip install torch --index-url https://download.pytorch.org/whl/cu124")
 
     # =========================================================================
     # PART A: Train Bias Intensity Regressor
@@ -320,13 +319,13 @@ def main():
     print("=======================================================")
     
     model_int = AutoModelForSequenceClassification.from_pretrained(
-        config.CLASSIFIER_MODEL, 
+        config.CLASSIFIER_MODEL,
         num_labels=1,  # Regression
         **model_kwargs
     )
-    if config.USE_CUDA:
+    if cuda_available:
         model_int.to("cuda")
-        
+
     training_args_int = TrainingArguments(
         output_dir=os.path.join(config.RESULTS_DIR, "intensity"),
         num_train_epochs=config.TRAIN_EPOCHS,
@@ -342,8 +341,8 @@ def main():
         load_best_model_at_end=True,
         metric_for_best_model="mse",
         greater_is_better=False,
-        save_total_limit=1,  # Keep only the best checkpoint on disk to avoid running out of space
-        fp16=config.USE_CUDA,
+        save_total_limit=1,
+        fp16=cuda_available,
         dataloader_pin_memory=False,
         remove_unused_columns=False,
         dataloader_num_workers=0,
@@ -379,13 +378,13 @@ def main():
     print("=======================================================")
     
     model_type = AutoModelForSequenceClassification.from_pretrained(
-        config.CLASSIFIER_MODEL, 
+        config.CLASSIFIER_MODEL,
         num_labels=11,  # 11 Classes
         **model_kwargs
     )
-    if config.USE_CUDA:
+    if cuda_available:
         model_type.to("cuda")
-        
+
     training_args_type = TrainingArguments(
         output_dir=os.path.join(config.RESULTS_DIR, "type"),
         num_train_epochs=config.TRAIN_EPOCHS,
@@ -401,8 +400,8 @@ def main():
         load_best_model_at_end=True,
         metric_for_best_model="accuracy",
         greater_is_better=True,
-        save_total_limit=1,  # Keep only the best checkpoint on disk to avoid running out of space
-        fp16=config.USE_CUDA,
+        save_total_limit=1,
+        fp16=cuda_available,
         dataloader_pin_memory=False,
         remove_unused_columns=False,
         dataloader_num_workers=0,
