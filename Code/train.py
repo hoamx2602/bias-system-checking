@@ -346,7 +346,7 @@ def main():
         fp16=(device_name == "cuda"),
         dataloader_pin_memory=False,
         remove_unused_columns=False,
-        dataloader_num_workers=0,
+        dataloader_num_workers=2,
         report_to="none"
     )
     
@@ -405,7 +405,7 @@ def main():
         fp16=(device_name == "cuda"),
         dataloader_pin_memory=False,
         remove_unused_columns=False,
-        dataloader_num_workers=0,
+        dataloader_num_workers=2,
         report_to="none"
     )
     

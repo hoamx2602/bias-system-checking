@@ -1,8 +1,10 @@
 import os
 import torch
-from dotenv import load_dotenv
+# pyrefly: ignore [missing-import]
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()  # Load variables from .env into os.environ
+# Search upward from this file's directory to find .env (handles running from Code/ subdir)
+load_dotenv(find_dotenv(usecwd=False) or os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # --- Device Detection ---
 if torch.cuda.is_available():
@@ -49,8 +51,8 @@ USE_PRETRAINED_CLASSIFIER = True
 TRAIN_SAMPLE_RATIO = 1.0  # Use 100% of data for training
 TEST_SPLIT_SIZE = 0.2
 TRAIN_EPOCHS = 100
-TRAIN_BATCH_SIZE = 4 if DEVICE == "cpu" else 8  # Smaller batch for CPU
-EVAL_BATCH_SIZE = 4 if DEVICE == "cpu" else 8   # Smaller batch for CPU
+TRAIN_BATCH_SIZE = 4 if DEVICE == "cpu" else 32  # Larger batch size to saturate M4 Pro/GPUs
+EVAL_BATCH_SIZE = 4 if DEVICE == "cpu" else 32   # Larger batch size to saturate M4 Pro/GPUs
 WARMUP_STEPS = 500
 WEIGHT_DECAY = 0.01
 LOGGING_STEPS = 50
