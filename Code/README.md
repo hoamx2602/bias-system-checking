@@ -47,6 +47,10 @@ $ python preprocess_data.py            # prompts before rebuilding if cache exis
 $ python app.py                        # visit  http://localhost:5001
 ```
 
+> **Windows Users** Before running `download_model.py`, you must enable **Developer Mode** so that the Hugging Face Hub can create symlinks for its model cache.
+> Go to **Settings → Privacy & security → For developers → Developer Mode → On**.
+> Without this, the download will fail with `[WinError 1314] A required privilege is not held by the client`.
+
 > **Note** GPU acceleration is detected automatically (`config.USE_CUDA`).  CPU-only execution is possible but slower.
 
 ---
