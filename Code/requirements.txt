@@ -11,6 +11,7 @@ Flask>=2.0.1
 fonttools>=4.58.0
 fsspec>=2025.3.2
 huggingface-hub>=0.23.0
+hf_xet>=1.0.0
 idna>=3.10
 iniconfig>=2.1.0
 itsdangerous>=2.2.0
