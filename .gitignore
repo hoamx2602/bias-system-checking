@@ -24,4 +24,4 @@ evaluation_results/
 
 # Dataset (Optional: depend on if user wants datasets in git, but typically excluded if large)
 # dataset/ 
-
+previous-results/
