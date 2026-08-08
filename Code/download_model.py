@@ -1,4 +1,11 @@
 import os
+import sys
+
+# Force-disable symlinks BEFORE any huggingface_hub import to avoid
+# [WinError 1314] on Windows when Developer Mode is not enabled.
+if sys.platform == "win32":
+    os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
 import config  # loads .env and configures HF environment variables
 
 from huggingface_hub import snapshot_download, HfApi
@@ -102,11 +109,13 @@ def main():
         ]
 
         # snapshot_download with an explicit cache_dir and limited files (avoids large ONNX assets and symlink issues)
+        # local_dir_use_symlinks=False prevents [WinError 1314] on Windows
         snapshot_download(
             repo_id=retrieval_model,
             token=token,
             cache_dir=cache_root,
             allow_patterns=retrieval_allow,
+            local_dir_use_symlinks=False,
         )
         print(f"\n--- Retrieval model '{retrieval_model}' downloaded successfully! ---")
 
@@ -116,6 +125,7 @@ def main():
             token=token,
             cache_dir=cache_root,
             allow_patterns=gen_allow,
+            local_dir_use_symlinks=False,
         )
         print(f"\n--- Generative model '{gen_model}' downloaded successfully! ---")
 
@@ -125,6 +135,7 @@ def main():
             repo_id=classifier_model,
             token=token,
             cache_dir=cache_root,
+            local_dir_use_symlinks=False,
         )
         print(f"--- Classifier model '{classifier_model}' downloaded successfully! ---")
         
