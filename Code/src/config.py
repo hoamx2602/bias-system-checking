@@ -1,0 +1,100 @@
+import os
+from pathlib import Path
+
+import torch
+# pyrefly: ignore [missing-import]
+from dotenv import load_dotenv, find_dotenv
+
+# Project root is Code/ (one level up from src/, which holds this file). Anchoring every
+# path below to BASE_DIR means these scripts work no matter what directory they are
+# launched from, instead of requiring the caller's cwd to be exactly Code/.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(find_dotenv(usecwd=False) or str(BASE_DIR / ".env"))
+
+# --- Device Detection ---
+if torch.cuda.is_available():
+    DEVICE = "cuda"
+elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+    DEVICE = "mps"
+else:
+    DEVICE = "cpu"
+
+USE_CUDA = (DEVICE == "cuda")
+# --- HF Environment Setup (must happen before any huggingface_hub / transformers import) ---
+_hf_cache = str(BASE_DIR / os.environ.get("HF_CACHE_DIR", "@.hf_cache"))
+os.makedirs(_hf_cache, exist_ok=True)
+os.environ.setdefault("HF_HOME", _hf_cache)
+os.environ.setdefault("HUGGINGFACE_HUB_CACHE", _hf_cache)
+# Propagate HF_TOKEN as the legacy var name some HF libs still read
+if os.environ.get("HF_TOKEN") and not os.environ.get("HUGGING_FACE_HUB_TOKEN"):
+    os.environ["HUGGING_FACE_HUB_TOKEN"] = os.environ["HF_TOKEN"]
+
+# --- File Paths ---
+DATA_DIR = str(BASE_DIR / "dataset")
+VECTOR_STORE_PATH = str(BASE_DIR / "bias_vector_store.pkl")
+TRAINED_MODEL_DIR_INTENSITY = str(BASE_DIR / "models" / "bias_classifier" / "intensity")
+TRAINED_MODEL_DIR_TYPE = str(BASE_DIR / "models" / "bias_classifier" / "type")
+RESULTS_DIR = str(BASE_DIR / "results")
+LOGS_DIR = str(BASE_DIR / "logs")
+EVALUATION_RESULTS_DIR = str(BASE_DIR / "evaluation_results")
+STATIC_DIR = str(BASE_DIR / "src" / "app" / "static")
+KNOWLEDGE_GRAPH_IMAGE_PATH = str(BASE_DIR / "src" / "app" / "static" / "knowledge_graph.png")
+
+# --- Model Configuration ---
+# Model for semantic search and context retrieval
+RETRIEVAL_MODEL = "sentence-transformers/all-mpnet-base-v2"
+# Generative model for answering questions based on context
+GENERATIVE_MODEL = "google/gemma-3-1b-it"
+# Optional: A classifier model for a supplemental bias score (can be trained via train.py)
+CLASSIFIER_MODEL = "distilbert-base-uncased"
+
+# --- Vector Store & Knowledge Graph ---
+SIMILARITY_THRESHOLD = 0.65  # For connecting similar scenarios in the graph
+GRAPH_NODE_COUNT_LIMIT = 50   # Max nodes for visualization to keep it readable
+
+# --- Training Hyperparameters (for train.py) ---
+USE_PRETRAINED_CLASSIFIER = True
+TRAIN_SAMPLE_RATIO = 1.0  # Use 100% of data for training
+TEST_SPLIT_SIZE = 0.2
+TRAIN_EPOCHS = 100
+TRAIN_BATCH_SIZE = 4 if DEVICE == "cpu" else 32  # Larger batch size to saturate M4 Pro/GPUs
+EVAL_BATCH_SIZE = 4 if DEVICE == "cpu" else 32   # Larger batch size to saturate M4 Pro/GPUs
+WARMUP_STEPS = 500
+WEIGHT_DECAY = 0.01
+LOGGING_STEPS = 50
+LEARNING_RATE = 5e-5
+
+# --- Application Settings ---
+PROMPT_TEMPLATE = """
+You are an AI Bias and Ethics Analyst. Your task is to provide a clear, neutral, and informative answer to the user's question based *only* on the context provided.
+
+**Instructions:**
+1.  Carefully read the user's question and all of the provided context documents.
+2.  Synthesize the information from the context to formulate a comprehensive answer.
+3.  Do not use any information outside of the provided context.
+4.  Directly answer the user's question. Do not just summarize the context.
+5.  If the context does not contain enough information to answer the question, state that you cannot provide a definitive answer based on the available information.
+
+**Context Document(s):**
+---
+{context}
+---
+
+**User's Question:**
+{question}
+
+**Analyst's Answer:**
+"""
+
+# --- Evaluation Settings ---
+EVALUATION_QUESTIONS = [
+    "What are the risks of overlooking contributions from women in tech?",
+    "How can stereotypes about age affect hiring decisions for older candidates?",
+    "Why is it problematic to assume someone's capabilities based on their accent?",
+    "Describe a scenario where social class bias might appear in a professional setting.",
+    "How might an AI recruitment tool develop a bias against candidates from non-traditional educational backgrounds?",
+    "What kind of intersectional bias might a disabled woman from a racial minority face in the workplace?",
+    "Explain how confirmation bias can affect a manager's performance review of an employee.",
+    "In what ways can regional stereotypes lead to unfair treatment in a national company?"
+] 
