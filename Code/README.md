@@ -212,6 +212,7 @@ Run on `0.0.0.0:5001` – change port in `app.py` if required.
 | `POST` | `/analyze` | `{ "question": "..." }` | Core RAG endpoint – returns JSON with `answer`, `source_contexts`, `bias_type` |
 | `GET`  | `/evaluation` | – | Displays manual evaluation page |
 | `POST` | `/run_evaluation` | – | Batch-runs RAG answers for the preset questions in `config.py` |
+| `POST` | `/run_mitigation_evaluation` | `{ "limit": 12, "seed": 42 }` or `{ "score_file": "..." }` | Reference-free mitigation scoring – bias reduction, content preservation, type consistency |
 | `GET`  | `/static/<path>` | – | Serves static assets (graph, gauge, CSS) |
 
 All responses are UTF-8 encoded JSON except for static/HTML routes.
@@ -222,6 +223,90 @@ All responses are UTF-8 encoded JSON except for static/HTML routes.
 * `templates/metrics.html`, `evaluation_results/metrics.json`
 * Confusion matrix (`confusion_matrix.png`) for the optional classifier.
 * `/run_evaluation` endpoint automates RAG-based responses over `config.EVALUATION_QUESTIONS`.
+
+### Reference-based metrics (`app.py`)
+BLEU-1…4, ROUGE-1/2/L and semantic similarity, compared against the hand-written
+`reference_answer` entries in `EVALUATION_TARGETS`. Because every item needs a reference,
+this only covers the 8 questions in `config.EVALUATION_QUESTIONS`. Output:
+`evaluation_results/rag_metrics.json`.
+
+### Reference-free mitigation metrics (`mitigation_metrics.py`)
+Measures whether the generated rewrite actually removes the bias, using the trained
+supervised heads instead of a reference answer — so any dialogue in `dataset/` is a valid
+evaluation item.
+
+| Signal | Definition |
+|--------|------------|
+| **Bias Reduction (Δ)** | `intensity(input) − intensity(mitigation)` from the intensity regressor |
+| **Content Preservation** | cosine similarity between input and mitigation on `all-mpnet-base-v2` |
+| **Type Consistency** | whether the predicted bias type changes after rewriting |
+
+The three only mean something together. A large Δ is not success on its own: the generator
+can drive the intensity to zero by writing about something else, which shows up as a high
+Δ with low similarity. The aggregate reports those separately:
+
+* `clean_mitigation_rate` — bias down **and** still on topic (the real success rate)
+* `gamed_rate` — bias down **but** off topic
+* `unchanged` / `amplified` rates, plus breakdowns by predicted input intensity band and by bias type
+
+Neutral inputs (intensity ≤ 0.15) have no bias to remove, so they are excluded from the Δ
+averages and reported as a separate count — they act as controls for over-rewriting.
+
+```bash
+# end-to-end: one full generation per sample
+python mitigation_metrics.py --limit 12
+
+# cheap: re-score pairs that were already generated
+python mitigation_metrics.py --score-file evaluation_results/rag_metrics.json
+```
+
+Output: `evaluation_results/mitigation_metrics.json`, rewritten after every sample so an
+interrupted run is not lost.
+
+#### Pinned judge — required before retraining on expanded data
+
+Δ is the intensity model's *opinion* of a text. Retraining that model changes every Δ even
+though the generator is untouched, so `+33 pts` measured before a retrain and `+41 pts`
+measured after are **not comparable** — the ruler moved, not the generator.
+
+To keep numbers comparable across dataset versions (e.g. when a new domain such as
+Procurement is added), snapshot the current heads and always score against that snapshot:
+
+```bash
+# 1. BEFORE retraining — freeze the current heads as a judge
+python mitigation_metrics.py --pin-judge models/bias_classifier_judge_v1
+
+# 2. Establish the baseline against the pinned judge
+python mitigation_metrics.py --judge-dir models/bias_classifier_judge_v1 --limit 50
+
+# 3. Expand dataset, retrain (train.py), then re-measure with the SAME judge
+python mitigation_metrics.py --judge-dir models/bias_classifier_judge_v1 --limit 50
+```
+
+Every report records which heads produced its numbers under `scored_by`, including a
+`comparable_across_retrains` flag — a file of deltas is unattributable without it. Runs that
+use the production heads are stamped `"scorer": "production"` and flagged as not comparable.
+
+`--pin-judge` refuses to overwrite an existing judge unless `--force` is passed, since
+overwriting invalidates every baseline already measured against it. Note that `models/` is
+in `.gitignore`: the judge snapshot is **not** version-controlled, so back it up if the
+baselines matter.
+
+What still needs redoing after each retrain, and what does not:
+
+| On dataset expansion + retrain | Redo? | Why |
+|---|:---:|---|
+| Re-run baseline Δ | Yes | New input distribution; use the pinned judge so it stays comparable |
+| Re-check similarity distribution | Yes | New text shapes shift the distribution |
+| Recalibrate `BIAS_REDUCTION_FLOOR` | Yes | Tied to the intensity model's MAE — read the new `eval_mae` |
+| Recalibrate `CONTENT_SIMILARITY_FLOOR` | Maybe | Only if the similarity distribution shifted materially |
+| Worry about the similarity *scale* | No | `all-mpnet-base-v2` is frozen and never fine-tuned |
+
+> Caveat: the intensity regressor's own validation MAE is ≈0.126, so a single Δ is noisy.
+> `BIAS_REDUCTION_FLOOR` (0.10) keeps borderline pairs in `unchanged` rather than counting
+> them as wins, but the aggregate rates are the trustworthy part, not per-sample verdicts.
+> Breakdowns are keyed on *predicted* input intensity, not the dataset version strings,
+> because `parse_bias_percentage()` defaults ~30% of the corpus to 50%.
 
 ---
 

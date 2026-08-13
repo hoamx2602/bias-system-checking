@@ -62,29 +62,37 @@ REVERSE_BIAS_TYPE_MAPPING = {v: k for k, v in BIAS_TYPE_MAPPING.items()}
 # --- Data Parsing Utilities ---
 def parse_bias_percentage(version_string):
     """
-    Parse bias percentage from version string with multiple format support.
+    Parse the annotated bias percentage from a version string.
+
+    Returns None when the string carries no real level annotation. Callers must drop
+    those samples rather than guessing a value — the previous implementation defaulted
+    them to 50%, which glued 423 of 1442 conversations (29%) to a label nobody
+    annotated and left the 50% class holding 604 samples against ~168 for every other
+    level. Dropping them yields a near-balanced set (169-171 per level).
+
+    The percentage no longer has to be parenthesised: the old regex required "(100%)"
+    and so silently mislabelled 12 conversations written as "Version 6: 100% Bias" as
+    50% — in the opposite direction of their true level.
     """
     import re
-    
-    # Try to extract percentage from parentheses
-    percentage_match = re.search(r'\((\d+)%\)', version_string)
+
+    # Any explicit percentage, parenthesised or not.
+    percentage_match = re.search(r'(\d+)\s*%', version_string)
     if percentage_match:
         return int(percentage_match.group(1))
-    
-    # If it's a "Mixed Bias" version, assign 50% (moderate bias)
-    if "Mixed Bias" in version_string:
-        return 50
-    
-    # If it contains "No Bias", assign 0%
+
+    # "No Bias" without a number is still an unambiguous annotation.
     if "No Bias" in version_string:
         return 0
-    
-    # If it contains "Extreme" or high-level bias indicators, assign 100%
-    if any(indicator in version_string.lower() for indicator in ["extreme", "severe", "high"]):
-        return 100
-    
-    # For any other format, default to moderate bias (50%)
-    return 50
+
+    # Everything else ("Mixed Bias Version 2: ...", "Unconscious Bias Version") states a
+    # bias *kind*, not a level. There is no defensible number to infer.
+    #
+    # Note the removed tier that mapped "extreme"/"severe"/"high" to 100%: it was
+    # unreachable, since every such string either carries an explicit percentage or
+    # starts with "Mixed Bias" and was caught earlier. It also contradicted the data,
+    # where "High Bias" is annotated 70%, not 100%.
+    return None
 
 # --- Dataset Class ---
 class BiasMultiDataset(Dataset):
@@ -120,7 +128,8 @@ def load_bias_data(data_dir=config.DATA_DIR, sample_ratio=config.TRAIN_SAMPLE_RA
     all_texts = []
     all_intensity_labels = []
     all_type_labels = []
-    
+    dropped_unlabelled = 0
+
     print(f"Loading data from {data_dir}...")
     for filename in os.listdir(data_dir):
         if filename.startswith("bias_data_for_type_") and filename.endswith(".json"):
@@ -137,15 +146,25 @@ def load_bias_data(data_dir=config.DATA_DIR, sample_ratio=config.TRAIN_SAMPLE_RA
                         version = conversation["version"]
                         dialogues = conversation["dialogues"]
                         
-                        # Parse bias level with multiple format support
+                        # Parse the annotated bias level; None means this conversation
+                        # carries no level annotation and must not be invented.
                         bias_percentage = parse_bias_percentage(version)
+                        if bias_percentage is None:
+                            dropped_unlabelled += 1
+                            continue
                         normalized_bias = bias_percentage / 100.0
-                        
+
                         text = " ".join(dialogues)
                         all_texts.append(text)
                         all_intensity_labels.append(normalized_bias)
                         all_type_labels.append(type_label)
-    
+
+    # Reported, not silent: dropping 29% of the corpus is a fact the operator should see.
+    if dropped_unlabelled:
+        total = len(all_texts) + dropped_unlabelled
+        print(f"Dropped {dropped_unlabelled}/{total} conversations with no bias-level "
+              f"annotation (version string states a bias kind, not a level).")
+
     if sample_ratio < 1.0:
         print(f"Sampling {sample_ratio * 100:.0f}% of the data...")
         sample_size = max(100, int(len(all_texts) * sample_ratio))
@@ -158,11 +177,59 @@ def load_bias_data(data_dir=config.DATA_DIR, sample_ratio=config.TRAIN_SAMPLE_RA
     return all_texts, all_intensity_labels, all_type_labels
 
 # --- Metrics Computation ---
+# The annotated levels are six discrete steps, not a continuum. MAE alone cannot say
+# whether the model tells 30% from 50%, so predictions are also snapped to the nearest
+# level and scored as an ordinal problem.
+BIAS_LEVELS = [0.0, 0.10, 0.30, 0.50, 0.70, 1.00]
+
+
+def snap_to_level_index(values):
+    """Index of the nearest annotated level for each value."""
+    levels = np.asarray(BIAS_LEVELS)
+    values = np.asarray(values, dtype=float).reshape(-1, 1)
+    return np.argmin(np.abs(values - levels.reshape(1, -1)), axis=1)
+
+
+def compute_level_metrics(labels, predictions):
+    """Ordinal accuracy over the six annotated levels.
+
+    'adjacent' counts a prediction as correct if it lands on the neighbouring level —
+    reported separately because the gap between levels is 20 points while the regressor's
+    error band is around 12, so off-by-one is a different failure from off-by-three.
+    """
+    true_idx = snap_to_level_index(labels)
+    pred_idx = snap_to_level_index(predictions)
+    distance = np.abs(true_idx - pred_idx)
+
+    metrics = {
+        "level_exact_accuracy": float(np.mean(distance == 0)),
+        "level_adjacent_accuracy": float(np.mean(distance <= 1)),
+        "level_mean_distance": float(np.mean(distance)),
+    }
+    try:
+        # Quadratic weights: being three levels out is penalised far more than one.
+        metrics["level_qwk"] = float(cohen_kappa_score(true_idx, pred_idx, weights="quadratic"))
+    except Exception:
+        metrics["level_qwk"] = 0.0
+
+    # Per-level recall exposes which levels the model actually cannot place.
+    per_level = {}
+    for i, level in enumerate(BIAS_LEVELS):
+        mask = true_idx == i
+        support = int(mask.sum())
+        per_level[f"{int(level * 100)}%"] = {
+            "support": support,
+            "recall": float(np.mean(pred_idx[mask] == i)) if support else 0.0,
+        }
+    metrics["level_per_level"] = per_level
+    return metrics
+
+
 def compute_regression_metrics(eval_pred):
     """Compute exhaustive regression metrics."""
     predictions, labels = eval_pred
     predictions = predictions.squeeze()
-    
+
     mse = mean_squared_error(labels, predictions)
     mae = mean_absolute_error(labels, predictions)
     rmse = np.sqrt(mse)
@@ -184,7 +251,7 @@ def compute_regression_metrics(eval_pred):
     except Exception:
         pearson_r, spearman_rho = 0.0, 0.0
         
-    return {
+    metrics = {
         "mse": float(mse),
         "mae": float(mae),
         "rmse": float(rmse),
@@ -196,6 +263,12 @@ def compute_regression_metrics(eval_pred):
         "pearson_r": float(pearson_r),
         "spearman_rho": float(spearman_rho)
     }
+    # Trainer's metric aggregation only accepts scalars, so the per-level breakdown is
+    # left out here; evaluate_level_labels.py reports it via compute_level_metrics().
+    level_metrics = compute_level_metrics(labels, predictions)
+    level_metrics.pop("level_per_level", None)
+    metrics.update(level_metrics)
+    return metrics
 
 def compute_classification_metrics(eval_pred):
     """Compute exhaustive classification metrics."""

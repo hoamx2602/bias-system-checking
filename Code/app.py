@@ -3,6 +3,14 @@ import config  # must be first: loads .env and configures HF environment variabl
 
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from models import get_analysis_pipeline
+from mitigation_metrics import (
+    extract_mitigation,
+    evaluate_pipeline,
+    evaluate_pairs,
+    load_dataset_dialogues,
+    print_summary,
+    JudgeModels,
+)
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
@@ -200,58 +208,6 @@ def compute_semantic_similarity(model, generated, reference):
     except Exception as e:
         print(f"Error computing semantic similarity: {e}")
         return 0.0
-
-def extract_mitigation(text):
-    """Robustly extracts the Reframed Neutral Mitigation section from the full response."""
-    if not text:
-        return ""
-    import re
-    # 1. Try to split by markdown headers ###
-    sections = re.split(r'###\s*', text)
-    for section in sections:
-        if not section.strip():
-            continue
-        lines = section.strip().split('\n')
-        header = lines[0].lower()
-        content = '\n'.join(lines[1:]).strip()
-        if any(h in header for h in ['mitig', 'refram', 'neutral', '🩹', '🤝', 'reframed']):
-            # Strip outer quotes if any
-            content = re.sub(r'^["\'“’]|["\'”’]$', '', content).strip()
-            return content
-            
-    # 2. Try line by line matching if no ### split succeeded
-    lines = text.split('\n')
-    mitigation_lines = []
-    found = False
-    for line in lines:
-        if not found:
-            # Check if line looks like a header for mitigation
-            if any(h in line.lower() for h in ['mitig', 'refram', 'neutral', '🩹', '🤝', 'reframed']) and any(x in line for x in ['#', ':', 'Verdict', 'Analysis', 'Mitigation', 'Response']):
-                found = True
-                continue
-        else:
-            # If we already found the header, collect content until another header starts
-            if line.strip().startswith('###') or (any(h in line.lower() for h in ['verdict', 'severity', 'analysis', 'contrast', '🚨', '🔍']) and len(line) < 50):
-                break
-            mitigation_lines.append(line)
-            
-    if found and mitigation_lines:
-        content = '\n'.join(mitigation_lines).strip()
-        content = re.sub(r'^["\'“’]|["\'”’]$', '', content).strip()
-        return content
-
-    # 3. Fallback: If there are multiple sections split by ###, return the last one
-    if len(sections) > 1:
-        last_section = sections[-1].strip()
-        lines = last_section.split('\n')
-        content = '\n'.join(lines[1:]).strip()
-        content = re.sub(r'^["\'“’]|["\'”’]$', '', content).strip()
-        return content
-        
-    # 4. Ultimate fallback: return clean text itself
-    content = text.strip()
-    content = re.sub(r'^["\'“’]|["\'”’]$', '', content).strip()
-    return content
 
 def get_default_classifier_metrics():
     """Generates highly detailed benchmark metrics representingDistilBERT models."""
@@ -544,6 +500,55 @@ def run_evaluation():
         json.dump(rag_payload, f, indent=4)
         
     return jsonify(rag_payload)
+
+@app.route('/run_mitigation_evaluation', methods=['POST'])
+def run_mitigation_evaluation():
+    """Reference-free evaluation of the mitigation itself.
+
+    Measures whether the generated rewrite actually lowers the bias intensity, and
+    whether it still discusses the same situation. Unlike /run_evaluation this needs no
+    hand-written reference answer, so it draws its inputs from the dataset instead of
+    the 8 questions in config.EVALUATION_QUESTIONS.
+
+    Body (all optional):
+      limit       number of dataset dialogues to run end-to-end (default 12)
+      seed        sampling seed (default 42)
+      score_file  path to already-generated pairs; scores those instead of generating
+      judge_dir   pinned judge to score with, keeping deltas comparable across retrains
+    """
+    if not analysis_pipeline:
+        return jsonify({
+            "error": "The AI analysis pipeline is not available. Please check the server logs."
+        }), 500
+
+    import json
+
+    data = request.get_json(silent=True) or {}
+    out_path = os.path.join(config.EVALUATION_RESULTS_DIR, "mitigation_metrics.json")
+
+    try:
+        judge_dir = data.get("judge_dir")
+        judge = JudgeModels(judge_dir) if judge_dir else None
+
+        score_file = data.get("score_file")
+        if score_file:
+            with open(score_file, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+            pairs = loaded.get("results", loaded) if isinstance(loaded, dict) else loaded
+            payload = evaluate_pairs(analysis_pipeline, pairs, out_path=out_path, judge=judge)
+        else:
+            samples = load_dataset_dialogues(
+                limit=int(data.get("limit", 12)),
+                seed=int(data.get("seed", 42)),
+            )
+            payload = evaluate_pipeline(analysis_pipeline, samples,
+                                        out_path=out_path, judge=judge)
+
+        print_summary(payload["aggregate"], payload.get("scored_by"))
+        return jsonify(payload)
+    except Exception as e:
+        print(f"Mitigation evaluation failed: {e}")
+        return jsonify({"error": f"Mitigation evaluation failed: {e}"}), 500
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
