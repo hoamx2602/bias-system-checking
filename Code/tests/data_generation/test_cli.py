@@ -27,3 +27,21 @@ def test_dry_run_creates_a_valid_manifest(tmp_path: Path):
     assert manifest["invalid_family_count"] == 0
     assert manifest["live_api_calls"] is False
     assert len(manifest["artifacts"]["provider_requests"]) == 3
+    request_file = next((tmp_path / "test-run" / "requests").glob("openai*.jsonl"))
+    request = json.loads(request_file.read_text(encoding="utf-8").splitlines()[0])
+    schema = request["body"]["text"]["format"]["schema"]
+    prompt = request["body"]["input"][0]["content"][0]["text"]
+    assert "generation_status" in schema["required"]
+    assert "# Severity anchors" in prompt
+
+
+def test_quality_report_fails_below_silver_threshold(tmp_path: Path, capsys):
+    path = tmp_path / "judge-results.jsonl"
+    records = [
+        {"verdict": "accept" if index < 84 else "repair"}
+        for index in range(100)
+    ]
+    path.write_text("\n".join(json.dumps(record) for record in records) + "\n", encoding="utf-8")
+    result = main(["quality-report", "--stage", "silver", "--input", str(path)])
+    assert result == 1
+    assert json.loads(capsys.readouterr().out)["acceptance_rate"] == 0.84

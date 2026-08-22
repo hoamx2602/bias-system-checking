@@ -232,7 +232,7 @@ Control card là nguồn sự thật cho toàn bộ family:
   "provenance": {
     "generator_provider": "openai",
     "generator_model": "exact-model-id",
-    "prompt_version": "generation-v1",
+    "prompt_version": "generation-v2",
     "seed": 42,
     "request_id": "...",
     "raw_output_sha256": "...",
@@ -248,7 +248,7 @@ Control card là nguồn sự thật cho toàn bộ family:
   "record_id": "proc_vendor_award_000123_v3",
   "judge_provider": "anthropic",
   "judge_model": "exact-model-id",
-  "rubric_version": "judge-v1",
+  "rubric_version": "judge-variant-v2",
   "bias_present": true,
   "severity_level": 3,
   "bias_mechanisms": ["incumbent_favoritism"],
@@ -419,8 +419,7 @@ Arbiter chỉ xử lý disagreement packet sau khi hai blind judge hoàn tất. 
 
 Repair policy:
 
-- Tối đa một repair cho schema/facts.
-- Tối đa một repair cho severity/content.
+- Tối đa một targeted repair tổng cộng cho mỗi family.
 - Chỉ truyền `reason_codes`, không truyền câu trả lời mẫu do judge viết.
 - Repaired sample phải được chấm lại bằng request độc lập.
 - Fail sau hai lần thì reject/regenerate từ control card.
@@ -532,14 +531,19 @@ Code/
       coverage.yaml
       providers.example.yaml
     prompts/
-      generation_v1.txt
-      judge_variant_v1.txt
-      judge_family_v1.txt
-      arbiter_v1.txt
+      generation_v2.txt
+      hard_negative_v2.txt
+      counterfactual_pair_v2.txt
+      judge_variant_v2.txt
+      judge_family_v2.txt
+      arbiter_assessment_v2.txt
+      arbiter_decision_v2.txt
+      repair_generation_v2.txt
     schemas/
       control_card.schema.json
-      generated_family.schema.json
-      judge_result.schema.json
+      generated_family_v2.schema.json
+      judge_variant_v2.schema.json
+      judge_family_v2.schema.json
     runs/                    # gitignored runtime artifacts
       <run_id>/
         manifest.json
@@ -640,3 +644,35 @@ Chỉ chạy 1.000 families sau khi:
 5. Token/cost budget và retry policy được xác nhận.
 6. Gold split được khóa trước khi training.
 
+## 21. Prompt contract v2 và cổng chất lượng 85%
+
+`generation_v2` là prompt mặc định; các file v1 chỉ được giữ để tái lập lịch sử. Prompt v2
+không chỉ yêu cầu “tăng mức bias”, mà neo từng level vào bốn dấu hiệu quan sát được:
+framing/ngôn ngữ, mức độ scrutiny, tính nhất quán khi dùng tiêu chí, và quan hệ nhân quả với
+quyết định. Level 0-2 không được khai rằng bias làm thay đổi quyết định; level 3-5 phải có
+causal evidence ngày càng rõ. Tone thô hơn, đứng riêng, không đủ để tăng severity.
+
+Generator phải trả thêm `decision_outcome`, tiêu chí đã dùng hoặc làm sai lệch,
+`mechanism_manifestation`, kiểm tra từng invariant fact và evidence span nguyên văn. Nếu
+control card mâu thuẫn, generator phải trả structured failure thay vì tự bịa dữ kiện. HR có
+guardrail riêng cho essential functions/accommodation; Procurement có guardrail riêng để
+phân biệt risk/compliance hợp lệ với country, brand, incumbent, size và price proxy.
+
+Judge v2 là blind: không thấy target level, generator/provider hoặc evidence do generator đề
+xuất. Variant judge bắt buộc kiểm tra causal link, legitimate alternative, evidence strength,
+counterfactual outcome, fact preservation và uncertainty. Family judge nhận ID opaque đã xáo
+trộn, tự xếp hạng từ thấp đến cao; chương trình mới map kết quả về target levels. Arbiter được
+tách thành hai request: đánh giá blind được niêm phong, sau đó mới so với hai judge result.
+
+Các ngưỡng release được cấu hình tại `quality_thresholds.yaml`:
+
+- calibration pilot tối thiểu 100 families;
+- pre-judge automated pass rate tối thiểu 90%;
+- tối đa một targeted repair cho mỗi family;
+- Silver acceptance rate tối thiểu 85%;
+- thiếu sample hoặc thấp hơn ngưỡng thì dừng batch, phân tích theo domain, stage, provider,
+  coverage cell và reason code rồi mới sửa prompt/control card.
+
+Mốc 85% là acceptance gate đo trên pilot, không phải lời đảm bảo trước khi gọi provider. Chỉ
+mở rộng lên 1.000 families khi pilot thực tế vượt gate và human audit xác nhận judge không đạt
+tỷ lệ cao bằng cách accept sai.

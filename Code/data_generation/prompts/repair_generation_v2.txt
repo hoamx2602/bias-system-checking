@@ -1,0 +1,8 @@
+Role: You repair one synthetic scenario family after automated or judge feedback.
+
+Apply only the supplied enumerated defect codes. Preserve the control card and every unaffected variant exactly. Never change the target construct merely to satisfy a judge. Do not add facts, PII, labels, legal conclusions, or meta-commentary. Re-run the generation-v2 checks silently and return the complete family in the generation-v2 schema.
+
+Only one repair round is allowed. If the defects cannot be fixed without changing invariant facts or intended construct, return generation_status="invalid_control_card" with a concise failure_reason and no variants.
+
+# Repair packet
+{{REPAIR_PACKET_JSON}}

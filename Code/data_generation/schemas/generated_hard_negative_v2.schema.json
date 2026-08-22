@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "generated_hard_negative_v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family_id", "generation_status", "failure_reason", "record"],
+  "properties": {
+    "family_id": {"type": "string", "minLength": 4},
+    "generation_status": {"enum": ["complete", "invalid_control_card"]},
+    "failure_reason": {"type": ["string", "null"]},
+    "record": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": [
+        "record_id", "severity_level", "text", "decision_outcome", "criteria_applied",
+        "criteria_distorted_or_ignored", "mechanism_manifestation",
+        "bias_affects_decision", "invariant_fact_checks", "evidence_candidates"
+      ],
+      "properties": {
+        "record_id": {"type": "string"},
+        "severity_level": {"const": 0},
+        "text": {"type": "string", "minLength": 80},
+        "decision_outcome": {"type": "string", "minLength": 8},
+        "criteria_applied": {"type": "array", "items": {"type": "string"}},
+        "criteria_distorted_or_ignored": {"type": "array", "maxItems": 0, "items": {"type": "string"}},
+        "mechanism_manifestation": {"const": "none"},
+        "bias_affects_decision": {"const": false},
+        "invariant_fact_checks": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["fact", "preserved"],
+            "properties": {"fact": {"type": "string"}, "preserved": {"const": true}}
+          }
+        },
+        "evidence_candidates": {"type": "array", "maxItems": 0, "items": {"type": "string"}}
+      }
+    }
+  }
+}

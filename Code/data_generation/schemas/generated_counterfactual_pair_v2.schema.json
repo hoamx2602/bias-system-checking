@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "generated_counterfactual_pair_v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family_id", "generation_status", "failure_reason", "changed_fields", "records"],
+  "properties": {
+    "family_id": {"type": "string", "minLength": 4},
+    "generation_status": {"enum": ["complete", "invalid_control_card"]},
+    "failure_reason": {"type": ["string", "null"]},
+    "changed_fields": {"type": "array", "items": {"type": "string"}},
+    "records": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["record_id", "counterfactual_values", "text", "decision_outcome", "criteria_applied", "invariant_fact_checks", "evidence_candidates"],
+        "properties": {
+          "record_id": {"enum": ["a", "b"]},
+          "counterfactual_values": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false, "required": ["field", "value"],
+              "properties": {"field": {"type": "string"}, "value": {"type": "string"}}
+            }
+          },
+          "text": {"type": "string", "minLength": 80},
+          "decision_outcome": {"type": "string", "minLength": 8},
+          "criteria_applied": {"type": "array", "items": {"type": "string"}},
+          "invariant_fact_checks": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false, "required": ["fact", "preserved"],
+              "properties": {"fact": {"type": "string"}, "preserved": {"const": true}}
+            }
+          },
+          "evidence_candidates": {"type": "array", "maxItems": 3, "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

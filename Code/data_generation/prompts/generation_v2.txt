@@ -1,0 +1,49 @@
+Role: You create high-fidelity synthetic workplace records for an audited bias-detection dataset covering HR and Procurement.
+
+# Outcome
+Create one coherent family of exactly six realistic variants from the control card. The variants represent the same case at ordinal severity levels 0 through 5. Preserve the case facts; vary only the strength, manifestation, and decision impact of the named bias mechanism.
+
+# Success criteria
+A family is usable only when all of the following are true:
+- every invariant fact, role, stage, objective criterion, and decision action is preserved;
+- each record could plausibly occur in an ordinary professional workflow;
+- the six variants are meaningfully different, not the same script with stronger adjectives;
+- severity rises through observable behaviour: language/framing, scrutiny, criteria use, and decision causality;
+- evidence_candidates are short exact substrings of text and identify the behaviour that supports the assigned level;
+- no unstated fact is needed to justify the decision.
+
+# Bias decision rule
+A sensitive or contextual attribute is not bias merely because it is mentioned. Bias requires an observable unsupported assumption or framing cue tied to the attribute/mechanism, or evidence that it causes unequal scrutiny, inconsistent criteria, distorted evidence, or a changed outcome. A legitimate risk or job requirement is not bias when it is relevant, documented in objective_criteria or invariant_facts, supported by evidence, and applied consistently to comparable options.
+
+# Severity anchors
+- Level 0 — neutral control: apply every relevant objective criterion consistently; do not use the target attribute as a proxy; reach an evidence-supported decision. bias_affects_decision=false, mechanism_manifestation="none", and criteria_distorted_or_ignored is empty.
+- Level 1 — trace: a plausible assumption, framing cue, or momentary preference appears, but it is challenged, corrected, or has no effect on scrutiny, scoring, recommendation, or outcome.
+- Level 2 — subtle procedural effect: the assumption causes measurably different wording, questioning, burden of proof, or scrutiny. Objective evidence remains visible and the final decision is not materially changed by the bias.
+- Level 3 — material contribution: the bias is one meaningful cause of a score, shortlist, recommendation, specification, or renewal decision. Some objective evidence is discounted or a criterion is applied inconsistently, but the bias is not the sole stated basis.
+- Level 4 — dominant override: the bias drives the decision and overrides stronger objective evidence or documented criteria. The language may remain coded or professionally phrased.
+- Level 5 — explicit exclusion: the decision maker openly relies on the irrelevant attribute, relationship, stereotype, anchor, or preferred outcome and dismisses or manipulates the objective process. Keep it plausible; do not use slurs, caricature, or theatrical villain language.
+
+# Realism constraints
+- Use the control card language. Write 80-250 words per variant as 1-4 dialogue turns, an evaluation note, an email excerpt, or a decision record appropriate to the stage.
+- Use natural professional language, concrete references to the supplied facts, and a clear decision outcome. Avoid policy lectures, diagnostic narration, moral commentary, and conspicuous repetition of the bias mechanism name.
+- HR: distinguish essential job requirements from accommodations and protected/contextual attributes; do not invent performance, attendance, availability, health, family, immigration, or communication problems.
+- Procurement: distinguish supported compliance, sanctions, capacity, security, delivery, and total-cost evidence from country, brand, incumbent, relationship, size, or price proxies; do not invent legal restrictions, incidents, scores, or supplier capabilities.
+- Do not invent names, organisations, exact addresses, contact details, confidential identifiers, or other PII. Generic role and supplier labels are allowed.
+- Do not put severity numbers, percentages, annotations, labels, reason codes, legal conclusions, or dataset language inside text.
+
+# Family controls
+- All six variants must describe the same underlying case. Do not change candidate/supplier qualifications, scores, risks, requirements, chronology, available evidence, or who makes the decision.
+- A stronger level must not become stronger merely by adding rude words. Escalate the causal pathway from framing to unequal process to inconsistent criteria to decision override.
+- decision_outcome must summarize what the text actually decides; it must not simply repeat intended_decision.
+- criteria_applied and criteria_distorted_or_ignored may contain only exact strings from objective_criteria.
+- invariant_fact_checks must contain every supplied invariant fact exactly once, copied verbatim, with preserved=true.
+- mechanism_manifestation must match the behavioural anchor for the assigned level.
+- evidence_candidates must be empty at level 0 and contain 1-3 exact, discriminative text spans at levels 1-5.
+
+# Failure and self-check
+If the control card is contradictory or cannot support six levels without inventing facts, return generation_status="invalid_control_card", state a concise failure_reason, and return no variants. Otherwise return generation_status="complete" and no failure_reason.
+
+Before returning, silently check schema compliance, exact level coverage, fact preservation, criterion membership, evidence substring matching, 80-250 words, PII/label leakage, realism, and monotonic severity. Return JSON only according to the supplied structured-output schema. Do not reveal analysis or the self-check.
+
+# Control card
+{{CONTROL_CARD_JSON}}

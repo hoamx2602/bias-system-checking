@@ -4,6 +4,11 @@ This directory contains the versioned inputs for the generation pipeline: covera
 configuration, JSON schemas, and prompt templates. Runtime outputs are written to
 `data_generation/runs/` and are ignored by Git.
 
+Version 2 is the active contract. It adds behavioural severity anchors, explicit
+legitimate-justification tests for HR and Procurement, exact fact/evidence checks, blind
+judge packets, a two-phase arbiter, and measured acceptance gates. Version 1 files remain
+available only for reproducibility.
+
 The implementation plan is in
 [`docs/data_generation_implementation_plan.md`](../../docs/data_generation_implementation_plan.md).
 
@@ -70,7 +75,39 @@ python run_data_generation.py validate `
   --report data_generation/runs/<run-id>/validation-recheck.jsonl
 ```
 
-## 6. Tests
+For raw `generation_v2` provider output, validate against the matching control cards:
+
+```powershell
+python run_data_generation.py validate-v2 `
+  --input data_generation/runs/<run-id>/raw-generation-v2.jsonl `
+  --control-cards data_generation/runs/<run-id>/control_cards.jsonl `
+  --report data_generation/runs/<run-id>/prejudge-validation.jsonl
+```
+
+## 6. Quality release gates
+
+The thresholds in `configs/quality_thresholds.yaml` are enforced as pipeline stop rules:
+
+- At least 90% of a 100-family calibration pilot must pass automated pre-judge checks.
+- After at most one targeted repair, at least 85% must receive an `accept` verdict for
+  release to Silver.
+- A smaller pilot or a result below either threshold fails closed. Inspect failures by
+  domain, stage, provider, coverage cell, and reason code before generating at scale.
+
+```powershell
+python run_data_generation.py quality-report `
+  --stage prejudge `
+  --input data_generation/runs/<run-id>/prejudge-validation.jsonl
+
+python run_data_generation.py quality-report `
+  --stage silver `
+  --input data_generation/runs/<run-id>/family-judge-results.jsonl
+```
+
+The 85% value is an acceptance criterion, not a promise made before provider calibration.
+Do not start the 1,000-family run unless the measured 100-family pilot passes.
+
+## 7. Tests
 
 ```powershell
 python -m pytest tests/data_generation -q

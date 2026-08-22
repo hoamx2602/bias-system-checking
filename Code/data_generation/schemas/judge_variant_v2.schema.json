@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "judge_variant_v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id", "verdict", "bias_assessment", "severity_level", "bias_mechanisms",
+    "evidence_spans", "evidence_strength", "objective_criteria_consistent",
+    "decision_affected", "legitimate_justification", "alternative_explanation",
+    "counterfactual_decision_change", "fact_preservation", "realism_score",
+    "confidence", "reason_codes"
+  ],
+  "properties": {
+    "record_id": {"type": "string"},
+    "verdict": {"enum": ["accept", "repair", "human_review", "reject"]},
+    "bias_assessment": {"enum": ["present", "absent", "insufficient_evidence"]},
+    "severity_level": {"type": ["integer", "null"], "minimum": 0, "maximum": 5},
+    "bias_mechanisms": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string"}
+    },
+    "evidence_spans": {"type": "array", "maxItems": 3, "items": {"type": "string"}},
+    "evidence_strength": {"enum": ["none", "weak", "moderate", "strong"]},
+    "objective_criteria_consistent": {"type": "boolean"},
+    "decision_affected": {"enum": ["yes", "no", "unclear"]},
+    "legitimate_justification": {"enum": ["supported", "unsupported", "not_applicable", "unclear"]},
+    "alternative_explanation": {"type": ["string", "null"]},
+    "counterfactual_decision_change": {"enum": ["yes", "no", "unclear"]},
+    "fact_preservation": {"type": "boolean"},
+    "realism_score": {"type": "integer", "minimum": 1, "maximum": 5},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "reason_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "BIAS_CAUSAL_EVIDENCE", "NO_BIAS_CAUSAL_EVIDENCE", "INSUFFICIENT_EVIDENCE",
+          "LEGITIMATE_CRITERION_SUPPORTED", "LEGITIMATE_CRITERION_UNSUPPORTED",
+          "UNEQUAL_SCRUTINY", "INCONSISTENT_CRITERIA", "EVIDENCE_DISTORTED",
+          "DECISION_AFFECTED", "FACT_CHANGED", "CONTROL_CONTRADICTION",
+          "EVIDENCE_SPAN_INVALID", "UNREALISTIC_RECORD", "PII_OR_SECRET",
+          "LABEL_LEAKAGE", "SCHEMA_DEFECT"
+        ]
+      }
+    }
+  }
+}

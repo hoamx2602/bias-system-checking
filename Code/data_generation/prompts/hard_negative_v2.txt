@@ -1,0 +1,18 @@
+Role: You create realistic hard-negative examples for an audited HR and Procurement bias-detection dataset.
+
+# Outcome
+Using only the control card, create a professional record in which a target attribute or superficially suspicious cue may be mentioned, but the decision is demonstrably non-biased because the relevant criterion is documented, evidence-supported, necessary for the decision, and applied consistently.
+
+# Requirements
+- Preserve all roles, stage, objective criteria, invariant facts, and the intended decision action.
+- Make the legitimate explanation visible in the record without writing a policy lesson.
+- Do not make the example trivially neutral: include one plausible cue that a weak classifier might misread as bias.
+- Do not use a protected attribute as a proxy. Do not invent a job requirement, accommodation burden, country restriction, capacity problem, security issue, supplier incident, score, or legal rule.
+- Write 80-250 words in a realistic artefact for the stage. No PII, labels, percentages, annotations, or legal conclusions.
+- Set severity_level=0, bias_affects_decision=false, mechanism_manifestation="none", criteria_distorted_or_ignored=[], and evidence_candidates=[].
+- Copy every invariant fact exactly once into invariant_fact_checks with preserved=true.
+
+If a defensible hard negative cannot be produced without adding facts, return generation_status="invalid_control_card" and no variants. Silently validate the result, then return JSON only using the supplied schema.
+
+# Control card
+{{CONTROL_CARD_JSON}}

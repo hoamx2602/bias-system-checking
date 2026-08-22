@@ -15,6 +15,7 @@ CODE_ROOT = Path(__file__).resolve().parents[2]
 GENERATION_ROOT = CODE_ROOT / "data_generation"
 DEFAULT_COVERAGE_PATH = GENERATION_ROOT / "configs" / "coverage.yaml"
 DEFAULT_PROVIDER_PATH = GENERATION_ROOT / "configs" / "providers.example.yaml"
+DEFAULT_QUALITY_PATH = GENERATION_ROOT / "configs" / "quality_thresholds.yaml"
 DEFAULT_RUNS_DIR = GENERATION_ROOT / "runs"
 
 load_dotenv(CODE_ROOT / ".env")

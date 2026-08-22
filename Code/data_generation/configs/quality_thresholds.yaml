@@ -1,0 +1,11 @@
+version: 2
+
+# These are release gates, not claims that a provider will meet them before a pilot.
+pilot_min_families: 100
+max_repair_attempts: 1
+prejudge_min_pass_rate: 0.90
+silver_min_acceptance_rate: 0.85
+
+accepted_silver_verdicts: [accept]
+stop_on_gate_failure: true
+report_dimensions: [domain, stage, generator_provider, coverage_cell, reason_code]

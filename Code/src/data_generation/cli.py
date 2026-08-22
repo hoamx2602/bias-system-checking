@@ -13,15 +13,18 @@ from .artifacts import file_sha256, read_jsonl, utc_run_id, write_json, write_js
 from .config import (
     DEFAULT_COVERAGE_PATH,
     DEFAULT_PROVIDER_PATH,
+    DEFAULT_QUALITY_PATH,
     DEFAULT_RUNS_DIR,
     GENERATION_ROOT,
+    load_yaml,
     load_provider_settings,
 )
 from .coverage import build_assignments, load_coverage_cells
 from .dry_run import control_card_from_assignment, render_dry_run_family
 from .providers import get_adapter
 from .providers.base import load_json
-from .validators import validate_against_schema, validate_family
+from .quality import evaluate_acceptance_gate
+from .validators import validate_against_schema, validate_family, validate_generated_family_v2
 
 
 def _enabled_providers(settings: dict[str, Any]) -> tuple[str, ...]:
@@ -31,12 +34,12 @@ def _enabled_providers(settings: dict[str, Any]) -> tuple[str, ...]:
     return providers
 
 
-def _load_prompt(name: str = "generation_v1.txt") -> str:
+def _load_prompt(name: str = "generation_v2.txt") -> str:
     return (GENERATION_ROOT / "prompts" / name).read_text(encoding="utf-8")
 
 
 def _load_generation_schema() -> dict[str, Any]:
-    schema = load_json(GENERATION_ROOT / "schemas" / "generated_family.schema.json")
+    schema = load_json(GENERATION_ROOT / "schemas" / "generated_family_v2.schema.json")
     # Provider structured-output APIs need the schema object, not its documentation IDs.
     return {key: value for key, value in schema.items() if key not in ("$schema", "$id")}
 
@@ -187,6 +190,43 @@ def command_validate(args: argparse.Namespace) -> int:
     return 1 if invalid else 0
 
 
+def command_validate_v2(args: argparse.Namespace) -> int:
+    families = read_jsonl(args.input)
+    cards = {card["family_id"]: card for card in read_jsonl(args.control_cards)}
+    reports = []
+    for family in families:
+        family_id = str(family.get("family_id", "unknown"))
+        card = cards.get(family_id)
+        if card is None:
+            raise ValueError(f"No control card found for family_id={family_id}")
+        reports.append(validate_generated_family_v2(family, card))
+    invalid = [report for report in reports if not report.valid]
+    if args.report:
+        write_jsonl(args.report, (report.to_dict() for report in reports))
+    print(f"Validated {len(reports)} v2 families: {len(reports) - len(invalid)} valid, {len(invalid)} invalid")
+    return 1 if invalid else 0
+
+
+def command_quality_report(args: argparse.Namespace) -> int:
+    thresholds = load_yaml(args.thresholds)
+    default_rate = (
+        thresholds["prejudge_min_pass_rate"]
+        if args.stage == "prejudge"
+        else thresholds["silver_min_acceptance_rate"]
+    )
+    summary = evaluate_acceptance_gate(
+        read_jsonl(args.input),
+        stage=args.stage,
+        minimum_rate=args.min_rate if args.min_rate is not None else float(default_rate),
+        minimum_records=args.min_records if args.min_records is not None else int(thresholds["pilot_min_families"]),
+    )
+    payload = summary.to_dict()
+    if args.output:
+        write_json(args.output, payload)
+    print(json.dumps(payload, indent=2))
+    return 0 if summary.gate_passed else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.set_defaults(func=None)
@@ -214,6 +254,21 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--input", required=True)
     validate.add_argument("--report")
     validate.set_defaults(func=command_validate)
+
+    validate_v2 = subparsers.add_parser("validate-v2", help="Validate raw generation-v2 JSONL against control cards")
+    validate_v2.add_argument("--input", required=True)
+    validate_v2.add_argument("--control-cards", required=True)
+    validate_v2.add_argument("--report")
+    validate_v2.set_defaults(func=command_validate_v2)
+
+    quality = subparsers.add_parser("quality-report", help="Enforce pre-judge or Silver acceptance gates")
+    quality.add_argument("--input", required=True)
+    quality.add_argument("--stage", required=True, choices=("prejudge", "silver"))
+    quality.add_argument("--thresholds", default=str(DEFAULT_QUALITY_PATH))
+    quality.add_argument("--min-rate", type=float)
+    quality.add_argument("--min-records", type=int)
+    quality.add_argument("--output")
+    quality.set_defaults(func=command_quality_report)
     return parser
 
 

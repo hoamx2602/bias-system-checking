@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arbiter_decision_v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_id", "action", "final_bias_assessment", "final_severity_level", "confidence", "reason_codes", "repair_scope"],
+  "properties": {
+    "record_id": {"type": "string"},
+    "action": {"enum": ["accept", "repair", "human_review", "reject"]},
+    "final_bias_assessment": {"enum": ["present", "absent", "insufficient_evidence"]},
+    "final_severity_level": {"type": ["integer", "null"], "minimum": 0, "maximum": 5},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "repair_scope": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+  }
+}
