@@ -9,6 +9,7 @@ __pycache__/
 venv/
 env/
 .venv/
+.venv-generation/
 .pytest_cache/
 
 # Jupyter Notebook
@@ -25,3 +26,6 @@ evaluation_results/
 # Dataset (Optional: depend on if user wants datasets in git, but typically excluded if large)
 # dataset/ 
 previous-results/
+
+# Synthetic generation runtime artifacts (manifests, prompts, and schemas stay tracked)
+Code/data_generation/runs/

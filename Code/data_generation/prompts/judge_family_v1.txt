@@ -1,0 +1,5 @@
+Evaluate the anonymized and randomly ordered variants as a family after each variant has
+already been judged independently. Determine whether severity is non-decreasing when
+ordered by the supplied intended ordinal IDs, whether invariant facts and decision action
+are preserved, whether neutral and extreme endpoints are sufficiently separated, and
+whether any pair contains a severity inversion. Return JSON only.

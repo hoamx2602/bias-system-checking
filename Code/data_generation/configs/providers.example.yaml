@@ -1,0 +1,31 @@
+version: 1
+
+# Model aliases are examples matching the design reviewed for this project. For a real
+# run, set the environment variables to exact model snapshots available to the account.
+providers:
+  openai:
+    enabled: true
+    api_key_env: OPENAI_API_KEY
+    generator_model_env: OPENAI_GENERATION_MODEL
+    generator_model_default: gpt-4o-mini-2024-07-18
+    judge_model_env: OPENAI_JUDGE_MODEL
+    judge_model_default: gpt-4.1-2025-04-14
+    batch_endpoint: /v1/responses
+
+  gemini:
+    enabled: true
+    api_key_env: GEMINI_API_KEY
+    generator_model_env: GEMINI_GENERATION_MODEL
+    generator_model_default: gemini-2.5-flash
+    judge_model_env: GEMINI_JUDGE_MODEL
+    judge_model_default: gemini-2.5-pro
+    batch_endpoint: models/{model}:batchGenerateContent
+
+  anthropic:
+    enabled: true
+    api_key_env: ANTHROPIC_API_KEY
+    generator_model_env: ANTHROPIC_GENERATION_MODEL
+    generator_model_default: claude-haiku-4-5-20251001
+    judge_model_env: ANTHROPIC_JUDGE_MODEL
+    judge_model_default: claude-sonnet-4-6
+    batch_endpoint: /v1/messages/batches

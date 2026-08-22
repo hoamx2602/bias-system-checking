@@ -1,0 +1,18 @@
+You are generating a controlled synthetic dataset for professional bias detection.
+
+Create exactly six variants for the supplied scenario control card, one for each ordinal
+severity level 0, 1, 2, 3, 4, and 5. Use only facts in the control card.
+
+Requirements:
+- Preserve the domain, stage, roles, objective criteria, invariant facts, and decision action.
+- Change only how strongly the specified bias mechanism influences language and decision-making.
+- Level 0 must apply objective criteria consistently and contain no bias.
+- Levels 1-2 are subtle or implicit. Levels 3-4 materially affect the decision.
+- Level 5 is explicit, but remain realistic professional language; do not add slurs.
+- Do not write percentages, severity labels, annotations, explanations, or legal conclusions inside the dialogue.
+- Do not create real names, email addresses, phone numbers, organizations, or other PII.
+- Each variant should be 80-250 words and contain 1-4 dialogue turns or one decision record.
+- Return JSON only and follow the supplied schema exactly.
+
+Scenario control card:
+{{CONTROL_CARD_JSON}}

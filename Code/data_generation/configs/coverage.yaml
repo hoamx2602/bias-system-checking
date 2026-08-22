@@ -1,0 +1,210 @@
+version: 1
+severity_levels: [0, 1, 2, 3, 4, 5]
+legacy_intensities: [0.0, 0.1, 0.3, 0.5, 0.7, 1.0]
+
+# This is the seed matrix used by dry-run and the 100-family calibration pilot. Expand
+# it only after human review; not every domain/stage/mechanism combination is applicable.
+cells:
+  - cell_id: hr_interview_gender
+    domain: hr
+    stage: interview
+    legacy_bias_type: 1_personal_identity
+    mechanisms: [gender_bias]
+    target_attributes: [gender]
+    roles: [interviewer, candidate]
+    scenario_summary: Two equally qualified candidates are discussed after interviews
+    objective_criteria: [role_experience, job_skills, structured_interview_score]
+    invariant_facts:
+      - Both candidates meet every mandatory requirement
+      - The structured interview scores differ by less than one point
+    intended_decision: The panel recommends a candidate after discussing role fit
+    priority: high
+    weight: 3
+    human_review_priority: true
+
+  - cell_id: hr_screening_age
+    domain: hr
+    stage: cv_screening
+    legacy_bias_type: 1_personal_identity
+    mechanisms: [age_bias]
+    target_attributes: [age]
+    roles: [recruiter, hiring_manager]
+    scenario_summary: A qualified applicant with long experience is screened for a technical role
+    objective_criteria: [relevant_skills, recent_experience, certification]
+    invariant_facts:
+      - The applicant meets all mandatory technical requirements
+      - The resume contains recent evidence of using the required tools
+    intended_decision: The hiring manager decides whether to advance the applicant
+    priority: high
+    weight: 3
+    human_review_priority: true
+
+  - cell_id: hr_interview_accent
+    domain: hr
+    stage: interview
+    legacy_bias_type: 9_culture_and_regional
+    mechanisms: [nationality_accent_bias]
+    target_attributes: [accent, national_origin]
+    roles: [interviewer, candidate]
+    scenario_summary: A candidate with a noticeable accent interviews for a client-facing role
+    objective_criteria: [communication_clarity, domain_knowledge, client_experience]
+    invariant_facts:
+      - The candidate communicates clearly and answers every technical question
+      - The candidate has three years of relevant client experience
+    intended_decision: The interviewer records a recommendation after the interview
+    priority: high
+    weight: 2
+    human_review_priority: true
+
+  - cell_id: hr_promotion_caregiving
+    domain: hr
+    stage: promotion
+    legacy_bias_type: 6_intersectional_and_compound
+    mechanisms: [pregnancy_caregiving_bias, gender_bias]
+    target_attributes: [caregiving_status, gender]
+    roles: [manager, promotion_committee_member]
+    scenario_summary: A high-performing employee with caregiving responsibilities is considered for promotion
+    objective_criteria: [performance, leadership_evidence, role_readiness]
+    invariant_facts:
+      - The employee exceeds the performance target
+      - The employee has led two successful cross-team projects
+    intended_decision: The committee decides whether to approve promotion
+    priority: high
+    weight: 2
+    human_review_priority: true
+
+  - cell_id: hr_performance_confirmation
+    domain: hr
+    stage: performance_review
+    legacy_bias_type: 10_behavioural_bias_indicators
+    mechanisms: [confirmation_bias, halo_horns_effect]
+    target_attributes: [prior_manager_impression]
+    roles: [manager, employee]
+    scenario_summary: A manager reviews an employee after receiving mixed project feedback
+    objective_criteria: [delivery_quality, collaboration, agreed_goals]
+    invariant_facts:
+      - The employee met four of five agreed goals
+      - Project feedback contains both strengths and one documented improvement area
+    intended_decision: The manager assigns a performance rating
+    priority: normal
+    weight: 2
+    human_review_priority: false
+
+  - cell_id: hr_selection_disability
+    domain: hr
+    stage: candidate_selection
+    legacy_bias_type: 8_health_and_wellness
+    mechanisms: [disability_bias]
+    target_attributes: [disability, accommodation_request]
+    roles: [hiring_manager, recruiter]
+    scenario_summary: A qualified candidate requests a reasonable interview accommodation
+    objective_criteria: [essential_job_functions, skills, interview_evidence]
+    invariant_facts:
+      - The accommodation does not change the essential job functions
+      - The candidate meets every mandatory requirement
+    intended_decision: The hiring team selects a finalist
+    priority: high
+    weight: 2
+    human_review_priority: true
+
+  - cell_id: procurement_award_incumbent
+    domain: procurement
+    stage: vendor_award
+    legacy_bias_type: 4_behavioural_and_psychological
+    mechanisms: [incumbent_favoritism, affinity_relationship_bias]
+    target_attributes: [prior_relationship]
+    roles: [procurement_manager, evaluation_committee_member]
+    scenario_summary: An incumbent and a new supplier compete for a service contract
+    objective_criteria: [weighted_score, price, service_level, implementation_risk]
+    invariant_facts:
+      - Both suppliers pass mandatory compliance checks
+      - The new supplier has the higher weighted score
+    intended_decision: The committee recommends a supplier for award
+    priority: high
+    weight: 3
+    human_review_priority: true
+
+  - cell_id: procurement_rfp_tailored
+    domain: procurement
+    stage: rfp_creation
+    legacy_bias_type: 5_situational_and_contexual
+    mechanisms: [tailored_specifications]
+    target_attributes: [preferred_vendor_product]
+    roles: [category_manager, technical_owner]
+    scenario_summary: A team drafts requirements for a competitive software procurement
+    objective_criteria: [business_need, interoperability, security, total_cost]
+    invariant_facts:
+      - Several products can satisfy the documented business need
+      - No sole-source justification has been approved
+    intended_decision: The team publishes the final technical requirements
+    priority: high
+    weight: 3
+    human_review_priority: true
+
+  - cell_id: procurement_prequalification_country
+    domain: procurement
+    stage: prequalification
+    legacy_bias_type: 9_culture_and_regional
+    mechanisms: [geographic_country_bias, inconsistent_risk_criteria]
+    target_attributes: [supplier_country]
+    roles: [risk_analyst, procurement_manager]
+    scenario_summary: Suppliers from several countries are assessed for prequalification
+    objective_criteria: [sanctions_screening, financial_stability, certification, delivery_risk]
+    invariant_facts:
+      - All suppliers pass sanctions screening
+      - Risk evidence is available for every supplier
+    intended_decision: The team decides which suppliers enter the tender
+    priority: high
+    weight: 2
+    human_review_priority: true
+
+  - cell_id: procurement_commercial_price_anchor
+    domain: procurement
+    stage: commercial_evaluation
+    legacy_bias_type: 10_behavioural_bias_indicators
+    mechanisms: [price_anchoring]
+    target_attributes: [initial_price]
+    roles: [commercial_evaluator, procurement_manager]
+    scenario_summary: A committee compares total cost proposals with different pricing structures
+    objective_criteria: [total_cost_of_ownership, contract_risk, service_scope]
+    invariant_facts:
+      - All proposals have been normalized to the same evaluation period
+      - One supplier has a high headline price but the lowest total cost of ownership
+    intended_decision: The committee assigns commercial scores
+    priority: normal
+    weight: 2
+    human_review_priority: false
+
+  - cell_id: procurement_evaluation_company_size
+    domain: procurement
+    stage: technical_evaluation
+    legacy_bias_type: 3_professional_and_educational
+    mechanisms: [company_size_bias, brand_reputation_bias]
+    target_attributes: [company_size, brand_familiarity]
+    roles: [technical_evaluator, category_manager]
+    scenario_summary: A small specialist supplier competes with a large known supplier
+    objective_criteria: [technical_solution, capacity_evidence, references, resilience_plan]
+    invariant_facts:
+      - Both suppliers demonstrate sufficient delivery capacity
+      - The specialist supplier has the higher technical score
+    intended_decision: The evaluators finalize technical scores
+    priority: normal
+    weight: 2
+    human_review_priority: false
+
+  - cell_id: procurement_renewal_recency
+    domain: procurement
+    stage: renewal_termination
+    legacy_bias_type: 10_behavioural_bias_indicators
+    mechanisms: [availability_recency_bias, confirmation_bias]
+    target_attributes: [recent_incident]
+    roles: [contract_manager, business_owner]
+    scenario_summary: A supplier renewal is assessed after one recent service incident
+    objective_criteria: [annual_performance, incident_severity, remediation, market_options]
+    invariant_facts:
+      - The supplier met annual service levels
+      - The recent incident was remediated within the contracted time
+    intended_decision: The business owner decides whether to renew the contract
+    priority: normal
+    weight: 2
+    human_review_priority: false

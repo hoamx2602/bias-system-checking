@@ -1,0 +1,5 @@
+Resolve a disagreement between two independent judges. First evaluate the scenario and
+evidence yourself without reading their recommendations. Then compare the disagreement
+packet and return exactly one action: accept, repair, human_review, or reject. A repair
+must contain reason_codes only, never replacement dialogue. Uncertain, policy-sensitive,
+or weak-evidence cases must be sent to human_review.

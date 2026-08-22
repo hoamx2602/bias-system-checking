@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "control_card.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "family_id", "domain", "stage", "language", "legacy_bias_type",
+    "bias_mechanisms", "target_attributes", "roles", "scenario_summary",
+    "objective_criteria", "invariant_facts", "intended_decision",
+    "counterfactual_fields", "applicable_levels", "generator_provider", "seed", "split"
+  ],
+  "properties": {
+    "family_id": {"type": "string", "minLength": 4},
+    "domain": {"enum": ["hr", "procurement"]},
+    "stage": {"type": "string", "minLength": 2},
+    "language": {"type": "string", "minLength": 2},
+    "legacy_bias_type": {"type": "string", "minLength": 2},
+    "bias_mechanisms": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "target_attributes": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "roles": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+    "scenario_summary": {"type": "string", "minLength": 20},
+    "objective_criteria": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+    "invariant_facts": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+    "intended_decision": {"type": "string", "minLength": 10},
+    "counterfactual_fields": {"type": "array", "items": {"type": "string"}},
+    "applicable_levels": {"const": [0, 1, 2, 3, 4, 5]},
+    "generator_provider": {"enum": ["openai", "gemini", "anthropic"]},
+    "seed": {"type": "integer"},
+    "split": {"enum": ["train", "validation", "test"]}
+  }
+}

@@ -1,0 +1,14 @@
+# Lightweight dependencies for offline planning, validation, and provider request building.
+python-dotenv>=1.0.0
+PyYAML>=6.0.2
+requests>=2.32.3
+jsonschema>=4.23.0
+
+# Optional SDKs for the future live-submit phase. The current CLI creates provider-native
+# batch artifacts but deliberately does not submit them.
+openai>=1.68.0
+anthropic>=0.49.0
+google-genai>=1.11.0
+
+# Offline validation suite
+pytest>=7.3.1
