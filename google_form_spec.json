@@ -1,0 +1,297 @@
+{
+  "FORM_TITLE": "[DRAFT – DO NOT DISTRIBUTE] Expert Validation: A Comprehensive Hierarchical Taxonomy of Biases in Human Decision-Making",
+  "SHEET_TITLE": "[DRAFT] Expert Validation – Taxonomy Bias Responses",
+  "SCALE_COLUMNS": [
+    "1 — Strongly disagree",
+    "2 — Disagree",
+    "3 — Neither agree nor disagree",
+    "4 — Agree",
+    "5 — Strongly agree",
+    "N/A — Outside expertise / cannot assess"
+  ],
+  "STANDARD_RATING_ROWS": [
+    "The category name accurately represents its content.",
+    "The definition is clear and understandable.",
+    "The listed dimensions appropriately belong in this category.",
+    "The category is relevant to the study of human decision-making bias.",
+    "The category is sufficiently distinct from the other categories.",
+    "The example accurately illustrates the category.",
+    "The category can be applied across more than one decision-making domain.",
+    "The category is useful for developing or annotating bias-detection datasets."
+  ],
+  "STANDARD_COMMENTS": [
+    [
+      "ADD_REMOVE",
+      "What, if anything, should be added to or removed from this category?"
+    ],
+    [
+      "OVERLAP",
+      "Does this category overlap with another category? If yes, explain where and how the boundary should be clarified."
+    ],
+    [
+      "RENAME",
+      "Would you rename this category or revise its definition? Please provide suggested wording."
+    ],
+    [
+      "MOVE",
+      "Should any listed dimension be moved to another category?"
+    ],
+    [
+      "EXAMPLE",
+      "Please provide any additional example that would improve understanding."
+    ]
+  ],
+  "categories": [
+    {
+      "code": "D1",
+      "title": "Category 1: Personal Identity Biases",
+      "definition": "Bias arising from intrinsic or socially recognised personal identity characteristics that influence perceptions, evaluations and decision-making about individuals.",
+      "dimensions": "Race; ethnicity; gender; age; religion; sexual orientation; national origin; socioeconomic status; language; marital status; parental status; veteran status; genetic information; legal status (e.g., citizenship, residency).",
+      "example": "A hiring panel rates an equally qualified candidate lower after learning that they hold non-citizen status, despite the candidate having unrestricted permission to work.",
+      "note": "Boundary note: “Socioeconomic Status” and “Marital Status”/“Parental Status” refer to an individual’s own demographic or social-position characteristics. Category 2 addresses related but distinct relational and behavioural constructs, including marital role expectations, parenting style, household composition and social-network affiliations."
+    },
+    {
+      "code": "D2",
+      "title": "Category 2: Social and Relational Biases",
+      "definition": "Bias arising from social relationships, interpersonal interactions, network affiliations and perceived similarity in interests or values that influence perceptions, evaluations and decision-making.",
+      "dimensions": "Family responsibilities (e.g., caregiver roles); volunteer and community engagement; social networks; peer groups; affiliations; friendship circles; marital role expectations; parenting style; household composition (e.g., single-parent, extended family); shared hobbies and interests; pet ownership; travel and leisure preferences; personal values; philanthropic interests.",
+      "example": "A manager gives a high-profile assignment to an employee from the same social network because they feel more comfortable with them.",
+      "note": "Boundary note: This category concerns relational standing, social connection and perceived interpersonal similarity rather than demographic status itself. Elective lifestyle and value-based dimensions are included only where they function as signals of affinity or social compatibility. Part F, Question 8 asks directly whether this consolidation is appropriate."
+    },
+    {
+      "code": "D3",
+      "title": "Category 3: Professional and Educational Biases",
+      "definition": "Bias arising from professional roles, educational backgrounds, qualifications and career-related characteristics that influence perceptions of competence, credibility or suitability.",
+      "dimensions": "Education; educational institution (e.g., alma mater prestige); field of study (e.g., STEM vs. humanities); work experience; professional title; certifications and licences; job title; industry (e.g., technology, finance, healthcare); career path (e.g., non-linear vs. linear); professional affiliations; employment history; professional skills; professional competencies.",
+      "example": "A panel rates a candidate more highly mainly because they attended a prestigious university.",
+      "note": ""
+    },
+    {
+      "code": "D4",
+      "title": "Category 4: Cognitive and Psychological Biases",
+      "definition": "Bias arising from psychological characteristics, cognitive tendencies, personality traits and behavioural patterns that influence judgement and decision-making.",
+      "dimensions": "Anchoring; confirmation bias; availability bias; halo effect; overconfidence; personality traits; personal resilience; emotional intelligence; conflict-resolution style; motivation; cognitive styles; adaptability; decision-making style; individual risk orientation, including cautious, risk-taking and adventure-seeking tendencies.",
+      "example": "An interviewer rates an introverted candidate as less capable of leadership, despite no evidence linking the two.",
+      "note": "Boundary note: This category addresses cognitive mechanisms, psychological traits and individual tendencies. “Individual risk orientation” is distinct from Category 5’s organisational risk-management practices and institutional risk tolerance."
+    },
+    {
+      "code": "D5",
+      "title": "Category 5: Situational and Contextual Biases",
+      "definition": "Bias arising from situational, organisational or environmental conditions that influence perceptions, evaluations and decision-making.",
+      "dimensions": "Power dynamics; role-based bias; organisational hierarchy; team dynamics; work environment; project assignments; resource availability; organisational culture; leadership influence; policy and procedure adherence; crisis situations; change management; innovation acceptance; organisational risk-management practices and institutional risk tolerance; cross-cultural interactions; situational stressors; organisational value alignment; environmental and sustainability value alignment; perceived organisational fit.",
+      "example": "Under severe time pressure during a system outage, a manager relies on a stereotype about a team rather than reviewing the complete evidence.",
+      "note": "Boundary note: Organisational risk-management practices and institutional risk tolerance are contextual or organisational conditions. They are distinct from Category 4’s individual risk orientation."
+    },
+    {
+      "code": "D6",
+      "title": "Category 6: Technological and Media Biases",
+      "definition": "Bias arising from technological systems, digital platforms and media environments that shape perceptions, evaluations and decision-making.",
+      "dimensions": "Digital literacy; technology access; technology adoption preferences; social media presence; online behaviour; digital footprint; media consumption habits; virtual communication styles; technological proficiency; preference for communication channels.",
+      "example": "A hiring manager interprets a limited online profile as evidence that an applicant lacks professional engagement.",
+      "note": ""
+    },
+    {
+      "code": "D7",
+      "title": "Category 7: Cultural and Regional Biases",
+      "definition": "Bias arising from cultural norms, traditions, regional identities and linguistic characteristics that influence perceptions, evaluations and decision-making.",
+      "dimensions": "Geographical location; cultural background; cultural norms and practices; regional dialects; voice accent; speech patterns; local customs; cultural heritage; traditions and celebrations; cultural adaptability; regional stereotypes; cultural expression styles; multicultural competence; cultural identity strength; generational cohort stereotypes (e.g., Generation Z, Millennials, Generation X or Baby Boomers).",
+      "example": "A customer-service applicant is judged as less capable because of their regional accent.",
+      "note": "Boundary note: “Generational cohort stereotypes” refers to culturally shared assumptions attached to a birth cohort as a social and cultural identity. This is distinct from “Age” in Category 1, which refers to chronological age as a demographic characteristic."
+    },
+    {
+      "code": "D8",
+      "title": "Category 8: Health and Wellness Biases",
+      "definition": "Bias arising from physical or mental health conditions, disability, neurodiversity, wellbeing or other health-related characteristics that influence perceptions, evaluations and treatment of individuals.",
+      "dimensions": "Physical health status; chronic illness; disability; neurodiversity; fitness assumptions; dietary and wellness practices where interpreted as health-related; health behaviours; healthcare access; body-image and weight-related health or wellbeing perceptions; mental health status.",
+      "example": "An employee with a disclosed long-term condition is passed over for promotion because of unsupported assumptions about reliability.",
+      "note": "Boundary note: “Body-image and weight-related health or wellbeing perceptions” concerns an underlying health/wellbeing characteristic or perception. Category 9 captures observable appearance-based stereotyping, assumptions or differential treatment."
+    },
+    {
+      "code": "D9",
+      "title": "Category 9: Bias Manifestations and Indicators",
+      "definition": "Observable expressions of underlying bias reflected in behaviour, communication, judgements and decision-making practices that reveal biased attitudes or preferences.",
+      "dimensions": "Differential rudeness or aggressiveness; stereotyping and generalisation; discriminatory or exclusionary language; microaggressions; favouritism; prejudicial statements or actions; unequal scrutiny; differential standards; social or organisational exclusion; appearance-based stereotyping, assumptions or differential treatment relating to physical appearance, height, weight, grooming, personal hygiene, fashion, personal style or body modification.",
+      "example": "Two equivalent candidates receive different levels of questioning and evidence requirements because of an identity-related assumption.",
+      "note": "Structural note: Unlike Categories 1–8, this category represents manifestations rather than underlying sources. It captures observable evidence that an underlying bias has been expressed. Part F, Question 7 asks whether this should remain a category or be represented as a separate layer."
+    },
+    {
+      "code": "D10",
+      "title": "Intersectionality (Cross-Cutting Property)",
+      "definition": "A cross-cutting relational property capturing compounded effects across two or more source categories and, where relevant, between multiple attributes within a single source category, producing overlapping or non-linear forms of disadvantage or privilege.",
+      "dimensions": "Illustrative combinations: age × disability; gender × non-linear career path; neurodiversity × veteran status; socioeconomic status × digital footprint; and gender × ethnicity (compounding within Personal Identity). These combinations use attributes already represented within Categories 1–8.",
+      "example": "An older employee with a disability is judged through the combined influence of age-related and disability-related assumptions in a way that cannot be adequately explained by either attribute independently.",
+      "note": "Structural note: Intersectionality is not a standalone source or manifestation. It is a cross-cutting relational property outside the numbered sequence. It primarily captures compounded effects across different source categories while also allowing multiple attributes within one source category to compound.",
+      "ratingRows": [
+        "The term “Intersectionality” accurately represents the proposed cross-cutting property.",
+        "The definition is clear and understandable.",
+        "The illustrative combinations appropriately demonstrate intersectional effects.",
+        "Intersectionality is relevant to understanding human decision-making bias.",
+        "Representing Intersectionality as a cross-cutting property rather than a standalone category is conceptually appropriate.",
+        "The example accurately illustrates an intersectional effect.",
+        "The cross-cutting property can be applied across different decision-making domains.",
+        "The cross-cutting property is useful for developing or annotating bias-detection datasets."
+      ],
+      "comments": [
+        [
+          "ADD_REMOVE",
+          "What, if anything, should be added to or removed from the proposed treatment of Intersectionality?"
+        ],
+        [
+          "OVERLAP",
+          "Does the proposed treatment of Intersectionality conflict or overlap with any category boundaries? If yes, explain how it should be clarified."
+        ],
+        [
+          "REVISE",
+          "Would you revise the term or definition of Intersectionality as used here? Please provide suggested wording."
+        ],
+        [
+          "COMBINATIONS",
+          "Should any of the illustrative combinations be revised, removed or replaced?"
+        ],
+        [
+          "EXAMPLE",
+          "Please provide any additional intersectional example that would improve understanding."
+        ]
+      ]
+    }
+  ],
+  "wholeTaxonomyRows": [
+    "The taxonomy has a clear and logical organising structure.",
+    "The taxonomy covers the major sources and forms of bias relevant to human decision-making.",
+    "The categories are collectively comprehensive.",
+    "The categories are sufficiently distinct and unnecessary duplication is limited.",
+    "The taxonomy is concise and avoids excessive complexity.",
+    "The taxonomy is robust enough to represent different decision-making domains.",
+    "The taxonomy can accommodate new or emerging bias dimensions.",
+    "The taxonomy helps explain how bias may arise, interact or become observable.",
+    "The taxonomy is suitable for supporting dataset development and annotation.",
+    "The taxonomy is potentially useful for AI- or LLM-based bias detection.",
+    "The terminology is appropriate for an interdisciplinary academic audience.",
+    "The taxonomy offers a meaningful contribution beyond existing fragmented classifications.",
+    "The distinction between Categories 1–8 as underlying sources and dimensions and Category 9 as observable manifestations and indicators is conceptually appropriate.",
+    "Intersectionality is appropriately represented as a cross-cutting relational property rather than as an additional taxonomy category."
+  ],
+  "directAssessment": [
+    [
+      "COMPREHENSIVENESS",
+      "Comprehensiveness: Are any important categories, dimensions, mechanisms or contexts missing?"
+    ],
+    [
+      "DISTINCTIVENESS",
+      "Mutual distinctiveness: Which categories or dimensions overlap too strongly?"
+    ],
+    [
+      "HIERARCHY",
+      "Hierarchy: Are dimensions located at the correct level and under the correct parent category?"
+    ],
+    [
+      "TERMINOLOGY",
+      "Terminology: Are any names too broad, too narrow, ambiguous or discipline-specific?"
+    ],
+    [
+      "BALANCE",
+      "Balance: Are some categories much more detailed than others without a clear reason?"
+    ],
+    [
+      "USABILITY",
+      "Practical usability: Could a trained annotator apply this taxonomy consistently to real decision narratives?"
+    ],
+    [
+      "COHERENCE",
+      "Theoretical coherence: Does the structure align with established theory in your field?"
+    ],
+    [
+      "FUTURE_USE",
+      "Future use: What revisions would make the taxonomy more useful for research, policy or AI applications?"
+    ]
+  ],
+  "recommendations": [
+    [
+      "F1_STRENGTHS",
+      "1. What are the three most important strengths of the proposed taxonomy?"
+    ],
+    [
+      "F2_WEAKNESSES",
+      "2. What are the three most important weaknesses or risks?"
+    ],
+    [
+      "F3_MISSING",
+      "3. Are any important bias categories or dimensions missing? Please specify."
+    ],
+    [
+      "F4_MERGE",
+      "4. Are any categories unnecessary or better merged?"
+    ],
+    [
+      "F5_RELOCATE",
+      "5. Are there any dimensions that should be split, renamed or relocated?"
+    ],
+    [
+      "F6_SOURCE_MANIFESTATION",
+      "6. Does the taxonomy adequately distinguish sources of bias from manifestations or indicators of bias?"
+    ],
+    [
+      "F7_CATEGORY9",
+      "7. Is “Bias Manifestations and Indicators” (Category 9) conceptually appropriate, or should manifestations be represented as a separate layer across all categories?"
+    ],
+    [
+      "F8_CATEGORY2",
+      "8. Category 2 incorporates elective lifestyle and value-based dimensions previously proposed as a standalone “Lifestyle and Values Biases” category. Is this consolidation appropriate, or should these dimensions form their own category?"
+    ],
+    [
+      "F9_INTERSECTIONALITY",
+      "9. Is Intersectionality appropriately represented as a cross-cutting relational property? Does the treatment accommodate both cross-category interactions and compounding within a single source category?"
+    ],
+    [
+      "F10_REFERENCES",
+      "10. What theoretical perspectives or key references should be added?"
+    ],
+    [
+      "F11_ESSENTIAL_CHANGES",
+      "11. What changes are essential before the taxonomy is used for dataset construction or AI-based detection?"
+    ]
+  ],
+  "meta": {
+    "researcherEmail": "[insert email address]",
+    "returnBy": "[insert requested return date]",
+    "retentionPeriod": "[insert retention period from the approved ethics documentation]",
+    "publish": false
+  },
+  "ethics": {
+    "dataProtection": "REPLACE BEFORE DISTRIBUTION with wording that matches the approved ethics documentation exactly.\n\nData controller: University of Bradford. Purpose: academic research as described in Part A. Lawful basis: [insert — normally \"task in the public interest\" for university research]. Personal data collected: reviewer code, and optionally your name, role, institution, discipline and email. Retention: {RETENTION}. Storage: responses are held in Google Workspace, which may involve transfer outside the UK under approved safeguards. Withdrawal: email {EMAIL} quoting your reviewer code and your response will be deleted. Data-protection queries: [insert DPO contact].\n\nThe completed form will be used for academic research. Individual comments may be paraphrased or reported in aggregated form in accordance with the approved ethics arrangements.",
+    "declarations": [
+      "I understand the purpose of this expert review.",
+      "I understand that participation is voluntary.",
+      "I understand how my feedback will be used.",
+      "I understand how to withdraw my response."
+    ]
+  },
+  "relevanceOptions": [
+    "1 — Not relevant",
+    "2 — Somewhat relevant",
+    "3 — Quite relevant",
+    "4 — Highly relevant",
+    "N/A — Outside my expertise"
+  ],
+  "experienceBands": [
+    "Under 5",
+    "5–9",
+    "10–14",
+    "15–19",
+    "20 or more"
+  ],
+  "gate": {
+    "question": "Do you wish to review this category in detail?",
+    "yes": "Yes — review this category",
+    "no": "No — skip to the next section"
+  },
+  "boundaryRows": [
+    "Chronological age (Cat. 1) and generational cohort stereotypes (Cat. 7) are sufficiently distinguishable in practice.",
+    "A social or alumni tie (Cat. 2) and institutional prestige used as a competence signal (Cat. 3) are sufficiently distinguishable.",
+    "An individual’s own socioeconomic or marital status (Cat. 1) and relational constructs such as household composition (Cat. 2) are sufficiently distinguishable.",
+    "Individual risk orientation (Cat. 4) and organisational risk practice or leadership influence (Cat. 5) are sufficiently distinguishable.",
+    "A digital footprint (Cat. 6) and socioeconomic status (Cat. 1) are sufficiently distinguishable.",
+    "Body-image or weight as a health/wellbeing perception (Cat. 8) and appearance-based differential treatment (Cat. 9) are sufficiently distinguishable.",
+    "Where only differential treatment is observable, coding Category 9 alone without inferring a source category is workable."
+  ]
+}
